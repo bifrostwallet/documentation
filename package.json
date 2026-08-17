@@ -1,0 +1,54 @@
+{
+  "name": "@bifrostwallet/documentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Developer documentation for Bifrost Wallet.",
+  "repository": "git@github.com:bifrostwallet/documentation.git",
+  "author": "Bifrost Software Ltd",
+  "license": "MIT",
+  "engines": {
+    "node": "24.18.0",
+    "yarn": "4.17.1"
+  },
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build && node ./scripts/csp/postbuild.mjs",
+    "csp:postbuild": "node ./scripts/csp/postbuild.mjs",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear",
+    "preinstall": "./scripts/security/require-verified-yarn.sh && ./scripts/security/block-ide-autostart-hooks.sh",
+    "prepare": "./scripts/security/require-verified-yarn.sh && ./scripts/security/block-ide-autostart-hooks.sh && ./scripts/install-git-hooks.sh",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "lint:shell": "./scripts/lint-shell.sh",
+    "security:check": "./scripts/security/security-checks.sh",
+    "security:verify-node": "./scripts/security/verify-node-version.sh",
+    "security:verify-yarn-binary": "./scripts/security/verify-yarn-hash.sh",
+    "security:verify-deps": "./scripts/security/verify-yarn-dependencies.sh",
+    "security:yarn-binary": "./scripts/security/yarn-binary.sh",
+    "security:yarn-binary:upgrade": "./scripts/security/yarn-binary.sh upgrade",
+    "security:require-verified-yarn": "./scripts/security/require-verified-yarn.sh",
+    "security:block-ide-hooks": "./scripts/security/block-ide-autostart-hooks.sh",
+    "security:audit-deps": "./yarn npm audit --recursive"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/plugin-content-docs": "3.10.2",
+    "@docusaurus/plugin-sitemap": "3.10.2",
+    "@docusaurus/theme-classic": "3.10.2",
+    "@mdx-js/react": "3.1.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2"
+  },
+  "browserslist": [
+    ">0.5%",
+    "not dead",
+    "not op_mini all"
+  ],
+  "packageManager": "yarn@4.17.1+sha256.471ffb15e0523663865bbf46a69e7d157ecf532412eb436c48dfab6e3f2abe88"
+}
