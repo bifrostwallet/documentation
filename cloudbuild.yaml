@@ -1,0 +1,28 @@
+# Bucket names are NOT stored in this repo. Set them on the Cloud Build trigger:
+#   _LOGS_BUCKET   e.g. gs://…-build-logs
+#   _DEPLOY_BUCKET e.g. gs://docs.…
+#
+# Logging: use logsBucket (GCS) only. Do NOT set options.logging: CLOUD_LOGGING_ONLY —
+# Cloud Build rejects that combination with logs_bucket.
+timeout: 600s
+logsBucket: '${_LOGS_BUCKET}'
+options:
+  machineType: 'E2_HIGHCPU_8'
+  env:
+    - 'COREPACK_ENABLE=0'
+substitutions:
+  # Placeholders only — real values come from the trigger (or `gcloud builds submit --substitutions=…`).
+  _LOGS_BUCKET: ''
+  _DEPLOY_BUCKET: ''
+steps:
+  - name: node:24.18.0
+    entrypoint: bash
+    args: ['-c', './yarn install --immutable']
+  - name: node:24.18.0
+    entrypoint: bash
+    args: ['-c', './yarn build']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: bash
+    args:
+      - '-c'
+      - 'gsutil -m rsync -r -d -c /workspace/build "${_DEPLOY_BUCKET}"'

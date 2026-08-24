@@ -1,0 +1,130 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.2/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "test": "recommended",
+      "types": "recommended",
+      "project": "recommended"
+    },
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "noNonNullAssertion": "warn",
+        "noUnusedTemplateLiteral": "error",
+        // Prefer import from "node:fs" over "fs" (and the same for other builtins).
+        "useNodejsImportProtocol": "error",
+        "noNestedTernary": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noConsole": { "level": "warn", "options": { "allow": ["log"] } },
+        "noImportCycles": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "useExhaustiveDependencies": "error",
+        "useParseIntRadix": "error",
+        // Biome cannot resolve packages via Yarn PnP yet (see base-repository docs).
+        "noUnresolvedImports": "off"
+      },
+      "complexity": {
+        "noForEach": "error"
+      },
+      "performance": {
+        "noBarrelFile": "error"
+      },
+      // Nursery rules are NOT auto-enabled by domain "recommended" — list explicitly.
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "useAwaitThenable": "error",
+        "useExhaustiveSwitchCases": "error",
+        "noImpliedEval": "error"
+      },
+      "security": {
+        "noSecrets": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "indentWidth": 2,
+    "indentStyle": "space",
+    "lineWidth": 100,
+    "formatWithErrors": false
+  },
+  "files": {
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.mts",
+      "**/*.cts",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.mjs",
+      "**/*.cjs",
+      "**/*.json",
+      "**/*.jsonc",
+      "!**/build",
+      "!**/.docusaurus",
+      "!**/static",
+      "!**/node_modules",
+      "!**/.yarn",
+      "!!**/.pnp.cjs",
+      "!!**/.pnp.loader.mjs"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "lineEnding": "lf"
+    }
+  },
+  // Throwaway keys / vectors in tests and fixtures — keep scanning production src.
+  "overrides": [
+    {
+      "includes": [
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/fixtures/**",
+        "**/__fixtures__/**",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "security": { "noSecrets": "off" }
+        }
+      }
+    },
+    {
+      // CLI / security scripts use stderr for user-facing errors.
+      // CSP HTML rewrites trip noSecrets entropy on attribute strings.
+      "includes": ["**/scripts/**"],
+      "linter": {
+        "rules": {
+          "security": { "noSecrets": "off" },
+          "suspicious": {
+            "noConsole": { "level": "warn", "options": { "allow": ["log", "error", "warn"] } }
+          }
+        }
+      }
+    }
+  ]
+}
