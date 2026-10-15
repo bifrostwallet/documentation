@@ -56,7 +56,7 @@ Bump the package version to pick up data releases. The npm package page ships th
 | Provider **picker** / discovery | Show only `listed: true` (`getListedProviders`) |
 | Already-selected provider (confirmations, details) | Show the entry even if `listed` is false (`getProvider` / `getProviders`) |
 
-Beyond `listed`, entries carry curator-maintained metadata you can surface: `managementGroup` (that chain’s FTSO Management Group membership — Flare and Songbird are separate), `domainLinked` (verified website↔identity linkage), `dualNetwork` (same brand on both Flare and Songbird), and `firstTransaction` (earliest known on-chain activity; useful for "active since" displays). These fields are not covered by the provider's ownership signature.
+Beyond `listed`, entries carry curator-maintained metadata you can surface: `managementGroup` (Flare FTSO Management Group membership; a Songbird entry mirrors its Flare membership), `domainLinked` (verified website↔identity linkage), `dualNetwork` (same brand on both Flare and Songbird), and `firstTransaction` (earliest known on-chain activity; useful for "active since" displays). These fields are not covered by the provider's ownership signature.
 
 ## Provider data model
 
@@ -65,12 +65,13 @@ Each provider entry (`data/providers/<chain>/<identityAddress>/info.json`):
 | Field | Notes |
 | --- | --- |
 | `name`, `description`, `websiteURL`, `links` | Self-reported, covered by the provider signature |
-| `identityAddress` and EntityManager addresses / `publicKey` / `validators` | Canonical key (lowercased) plus on-chain snapshot |
+| `identityAddress` | Canonical key (lowercased); covered by the provider signature |
+| `delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators` | On-chain snapshot, including validator NodeIDs. Not covered by the signature; a nightly job may refresh them |
 | `acknowledgedResponsibilities` | Portal checkbox (`true` for new submissions); signature-covered |
 | `logoHash` | SHA-256 of `logo.webp`, signature-covered integrity anchor |
 | `logoURL` | Relative in git; **absolute** (GitHub raw by default) in the NPM package |
 | `listed` | Curator-granted flag for provider-picker UIs |
-| `managementGroup` | That chain’s FTSO Management Group membership (Flare and Songbird each have their own PollingManagementGroup) |
+| `managementGroup` | Flare FTSO Management Group membership. A Songbird entry mirrors its Flare membership |
 | `domainLinked` | Website↔identity linkage, refreshed periodically |
 | `dualNetwork` | Same brand on Flare and Songbird |
 | `firstTransaction` | Earliest known on-chain activity (may be absent) |
@@ -106,4 +107,4 @@ If you operate your own static mirror, compare section hashes from `getSectionHa
 
 ## Migration note
 
-The older [`ftso-signal-providers`](https://github.com/bifrostwallet/ftso-signal-providers) repository is deprecated. Migrate to `@bifrostwallet/assets`.
+Token lists and the provider registry both come from this package. `@towolabs/tokens` and [`ftso-signal-providers`](https://github.com/TowoLabs/ftso-signal-providers) are superseded by `@bifrostwallet/assets`.
