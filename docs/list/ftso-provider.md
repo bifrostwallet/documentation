@@ -46,7 +46,7 @@ Each provider lives under `data/providers/<eip155-14|eip155-19>/<identityAddress
 | `delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators` | no | On-chain snapshot, including validator NodeIDs. A nightly job may update these without a new signature |
 | `logoURL` | no | Relative hosting path |
 | `listed` | no | Granted by curators |
-| `managementGroup` | no | Synced from Flare’s PollingManagementGroup. A Songbird entry mirrors its Flare membership |
+| `managementGroup` | no | Synced from that network’s PollingManagementGroup. Flare and Songbird each have their own group |
 | `domainLinked` | no | Refreshed nightly from your website’s [domain linkage](#domain-linkage-optional-recommended) proof |
 | `dualNetwork` | no | Curator-maintained: same brand present on both Flare and Songbird in the catalog |
 | `firstTransaction` | no | Earliest known on-chain activity |

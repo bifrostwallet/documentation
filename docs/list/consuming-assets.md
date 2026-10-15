@@ -56,7 +56,7 @@ Bump the package version to pick up data releases. The npm package page ships th
 | Provider **picker** / discovery | Show only `listed: true` (`getListedProviders`) |
 | Already-selected provider (confirmations, details) | Show the entry even if `listed` is false (`getProvider` / `getProviders`) |
 
-Beyond `listed`, entries carry curator-maintained metadata you can surface: `managementGroup` (Flare FTSO Management Group membership; a Songbird entry mirrors its Flare membership), `domainLinked` (verified website↔identity linkage), `dualNetwork` (same brand on both Flare and Songbird), and `firstTransaction` (earliest known on-chain activity; useful for "active since" displays). These fields are not covered by the provider's ownership signature.
+Beyond `listed`, entries carry curator-maintained metadata you can surface: `managementGroup` (that network’s FTSO Management Group membership; Flare and Songbird each have their own group), `domainLinked` (verified website↔identity linkage), `dualNetwork` (same brand on both Flare and Songbird), and `firstTransaction` (earliest known on-chain activity; useful for "active since" displays). These fields are not covered by the provider's ownership signature.
 
 ## Provider data model
 
@@ -71,7 +71,7 @@ Each provider entry (`data/providers/<chain>/<identityAddress>/info.json`):
 | `logoHash` | SHA-256 of `logo.webp`, signature-covered integrity anchor |
 | `logoURL` | Relative in git; **absolute** (GitHub raw by default) in the NPM package |
 | `listed` | Curator-granted flag for provider-picker UIs |
-| `managementGroup` | Flare FTSO Management Group membership. A Songbird entry mirrors its Flare membership |
+| `managementGroup` | That network’s FTSO Management Group membership. Flare and Songbird each have their own group |
 | `domainLinked` | Website↔identity linkage, refreshed periodically |
 | `dualNetwork` | Same brand on Flare and Songbird |
 | `firstTransaction` | Earliest known on-chain activity (may be absent) |
