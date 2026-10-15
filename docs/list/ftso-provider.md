@@ -40,17 +40,18 @@ Each provider lives under `data/providers/<eip155-14|eip155-19>/<identityAddress
 | Field | Signed by identity? | Source |
 | --- | --- | --- |
 | `name`, `description`, `websiteURL`, `links` | yes | You |
-| `identityAddress` and EntityManager addresses / `publicKey` / `validators` | yes | On-chain + you sign the snapshot |
+| `identityAddress` | yes | The address you sign with |
 | `acknowledgedResponsibilities` | yes | Portal checkbox (`true` for new submissions) |
 | `logoHash` | yes | SHA-256 of `logo.webp` |
+| `delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators` | no | On-chain snapshot, including validator NodeIDs. A nightly job may update these without a new signature |
 | `logoURL` | no | Relative hosting path |
 | `listed` | no | Granted by curators |
-| `managementGroup` | no | Synced from that chain’s PollingManagementGroup (Flare and Songbird are separate groups) |
+| `managementGroup` | no | Synced from that network’s PollingManagementGroup. Flare and Songbird each have their own group |
 | `domainLinked` | no | Refreshed nightly from your website’s [domain linkage](#domain-linkage-optional-recommended) proof |
 | `dualNetwork` | no | Curator-maintained: same brand present on both Flare and Songbird in the catalog |
 | `firstTransaction` | no | Earliest known on-chain activity |
 
-Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, and `firstTransaction`.
+Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON is your listing text, `identityAddress`, `acknowledgedResponsibilities`, and `logoHash`. It excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, `firstTransaction`, and the chain snapshot (`delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators`).
 
 The signature requirement is a **self-signature** by your identity address. Entries that predate the repository's public launch are grandfathered until **1 November 2026**; after that date, entries without a valid self-signature are delisted until signed.
 
