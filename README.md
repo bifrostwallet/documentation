@@ -4,7 +4,7 @@ Developer documentation for [docs.bifrostwallet.com](https://docs.bifrostwallet.
 
 ## Requirements
 
-- Node **24.18.0** (see `.node-version`)
+- Node **24.22.1** (see `.node-version`)
 - Yarn **4.17.1** via the committed `./yarn` launcher (do **not** use Corepack or a global Yarn)
 
 ## Local development
