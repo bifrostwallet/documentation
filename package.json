@@ -14,7 +14,6 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build && node ./scripts/csp/postbuild.mjs",
-    "csp:postbuild": "node ./scripts/csp/postbuild.mjs",
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "preinstall": "./scripts/security/require-verified-yarn.sh && ./scripts/security/block-ide-autostart-hooks.sh",

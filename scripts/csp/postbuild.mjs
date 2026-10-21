@@ -8,7 +8,7 @@
  * This site is dark-only (`disableSwitch` + `defaultMode: 'dark'`), so we bake
  * theme attrs onto <html>, strip executable inline scripts, and move the SVG
  * hide rule into CSS. Prism still emits style="" on tokens — covered by
- * style-src-attr 'unsafe-inline' on the backend bucket (see STATUS.md).
+ * style-src-attr 'unsafe-inline' on the backend bucket.
  *
  * JSON-LD (`type="application/ld+json"`) is left in place; it is not JS and is
  * not governed by script-src under CSP Level 3.

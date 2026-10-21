@@ -11,9 +11,6 @@ const config = {
   // Inline JS/CSS: incompatible with a strict CSP on the LB/backend bucket.
   baseUrlIssueBanner: false,
 
-  organizationName: "bifrostwallet",
-  projectName: "documentation",
-
   onBrokenLinks: "throw",
 
   i18n: {
@@ -21,7 +18,6 @@ const config = {
     locales: ["en"],
   },
 
-  // Hand-rolled plugins/themes; add gtag / Algolia packages later if needed.
   plugins: [
     [
       "@docusaurus/plugin-content-docs",
@@ -50,12 +46,6 @@ const config = {
       disableSwitch: true,
       respectPrefersColorScheme: false,
     },
-    docs: {
-      sidebar: {
-        hideable: false,
-        autoCollapseCategories: false,
-      },
-    },
     navbar: {
       title: "",
       logo: {
@@ -78,7 +68,6 @@ const config = {
     },
     footer: {
       style: "dark",
-      links: [],
       copyright: `© ${new Date().getFullYear()} Bifrost Software Ltd`,
     },
     prism: {
