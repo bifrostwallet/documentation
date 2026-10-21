@@ -52,8 +52,6 @@
   --ifm-navbar-background-color: rgba(3, 2, 20, 0.85);
   --ifm-footer-background-color: #020119;
   --ifm-footer-color: var(--bifrost-text-muted);
-  --ifm-footer-link-color: var(--bifrost-text);
-  --ifm-footer-title-color: var(--bifrost-text);
   --ifm-link-color: var(--bifrost-primary-hover);
   --ifm-link-hover-color: var(--bifrost-tint);
   --ifm-code-font-size: 90%;
@@ -274,39 +272,9 @@ div[class*='codeBlockTitle'] {
   background: #020119;
 }
 
-.footer__title {
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--bifrost-text-muted);
-  font-weight: 600;
-}
-
-.footer__link-item {
-  font-size: 0.9rem;
-  line-height: 1.8;
-}
-
 .footer__copyright {
   color: var(--bifrost-text-muted);
   font-size: 0.85rem;
-}
-
-.button.button--secondary {
-  background: var(--bifrost-bg-surface);
-  border: 1px solid var(--bifrost-border);
-  color: var(--bifrost-text);
-}
-
-.button.button--primary {
-  background: var(--bifrost-primary);
-  border: none;
-  color: #fff;
-}
-
-.button.button--primary:hover {
-  background: var(--bifrost-primary-hover);
-  color: #fff;
 }
 
 .theme-doc-toc-mobile {
