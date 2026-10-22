@@ -21,6 +21,9 @@ import {
   findProviderByValidator,
   getNativeToken,
   getToken,
+  getContract,
+  getContracts,
+  CONTRACT_CATEGORY_LABELS,
 } from "@bifrostwallet/assets";
 
 // Chain ids are CAIP-2 (e.g. "eip155:14", "eip155:19")
@@ -37,17 +40,36 @@ const picker = getListedProviders("eip155:14"); // listed: true only
 const flr = getNativeToken("eip155:14"); // address === null
 // WNAT / WFLR on Flare (lookup is case-insensitive)
 const wflr = getToken("eip155:14", "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d");
+
+// Transaction-review names. Lookup is case-insensitive. null when unknown.
+const pool = getContract("eip155:14", "0x3A06584A47972fF7005301b5A44c7D2214A4d3b4");
+// pool?.projectName === "Bifrost Wallet"
+// pool?.contractName === "Collateral Pool"
+// pool?.category === "fassets"
+// pool && CONTRACT_CATEGORY_LABELS[pool.category] === "FAssets"
+// pool?.logoURL ends with "dapps/bifrostwallet-com/logo.webp"
+// pool?.logoHash is the SHA-256 of that dapp logo
+const flareContracts = getContracts("eip155:14");
+const everyContract = getContracts();
 ```
 
 CommonJS:
 
 ```js
-const { getProvider, getListedProviders, getNativeToken } = require("@bifrostwallet/assets");
+const {
+  getProvider,
+  getListedProviders,
+  getNativeToken,
+  getContract,
+  CONTRACT_CATEGORY_LABELS,
+} = require("@bifrostwallet/assets");
 
 const bifrost = getProvider("eip155:14", "0x1650d2760baee638c034200dedcbe17b050d0364");
+const pool = getContract("eip155:14", "0x3a06584a47972ff7005301b5a44c7d2214a4d3b4");
+// pool && CONTRACT_CATEGORY_LABELS[pool.category] === "FAssets"
 ```
 
-Bump the package version to pick up data releases. The npm package page ships the same quick-start examples.
+Bump the package version to pick up data releases.
 
 ## Visibility for providers
 
@@ -86,6 +108,10 @@ Ownership proof lives in `signatures.json` beside each entry. Grandfathering for
 https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/eip155-14/all.json
 https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/eip155-14/all.json
 ```
+
+Contract names are `getContract` / `getContracts`. The package bundles them at build time from `data/contracts/<chain>/<address>.json`. `projectName` is the dapp title, and `logoURL` / `logoHash` are copies of that dapp's logo. There is no `data/contracts/<chain>/all.json` and no `data/dapps/all.json`. Aggregates are only the provider and token lists above.
+
+Dapp browser chips are `getDappCategories()`, bundled from `data/dapps/categories.json` (also at `dapps/categories.json` in this package). Chip order is featured, dex, lending, yield, staking, bridges, marketplaces, social, games, other. That file is hand-ordered and is not an `all.json`.
 
 Relative `logoURL` values in git resolve against:
 
