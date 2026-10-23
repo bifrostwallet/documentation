@@ -147,5 +147,5 @@ Prefer listing only methods you call. Bifrost may advertise additional methods i
 ## References
 
 * [Reown AppKit](https://docs.reown.com/appkit/overview)
-* [WalletConnect mobile linking](https://docs.walletconnect.network/wallet-sdk/ios/mobile-linking)
+* [WalletConnect mobile linking](https://docs.walletconnect.com/wallets/ios/mobile-linking)
 * [CAIP-10 account IDs](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-10.md)
