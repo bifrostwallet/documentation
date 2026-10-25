@@ -14,11 +14,11 @@ Dapp entries are curated in [`bifrostwallet/assets`](https://github.com/bifrostw
 | --- | --- |
 | `title` | 2–32 characters |
 | `description` | 10–350 characters (printable ASCII) |
-| `url` | `https` only; paths allowed; **no query parameters** |
+| `url` | `https` only; paths allowed; at most **128 characters**; **no query parameters or fragment** |
 | `logo` | Upload **PNG or WebP**, at least **128×128** (larger OK); form resizes to opaque **128×128** WebP ≤24 KB (`logo.webp`) |
 | `chains` | One or more Bifrost-supported CAIP-2 chains (Flare, Songbird, and other mainnets offered in the form) |
-| `category` | `dex`, `yield`, `nft`, `games`, or `other` |
-| `categoryOther` | Required in the signed submission when `category` is `other` (2–32 characters); curators map it before catalog publish |
+| `category` | `featured`, `dex`, `lending`, `yield`, `staking`, `bridges`, `marketplaces`, `social`, `games`, or `other`. `marketplaces` is the NFT marketplace chip. Curators place the dapp on chips after ingest |
+| `categoryOther` | Optional, and only when `category` is `other` (2–32 characters) |
 | Domain linkage | Required: put the **EVM signing address** in `/.well-known/bifrost-dapp.txt` and/or `_bifrost-dapp` DNS (see below) |
 
 ## Entry shape
