@@ -217,6 +217,6 @@ const signature = await client.request({
 
 * [BIP-122 CAIP-2](https://github.com/ChainAgnostic/namespaces/blob/main/bip122/caip2.md)
 * [BIP-122 CAIP-10](https://github.com/ChainAgnostic/namespaces/blob/main/bip122/caip10.md)
-* [WalletConnect Bitcoin RPC](https://docs.walletconnect.com/advanced/multichain/rpc-reference/bitcoin-rpc)
-* [WalletConnect Litecoin RPC](https://docs.walletconnect.com/advanced/multichain/rpc-reference/litecoin-rpc)
-* [WalletConnect Dogecoin RPC](https://docs.walletconnect.com/advanced/multichain/rpc-reference/dogecoin-rpc)
+* [Reown Bitcoin RPC](https://docs.reown.com/advanced/multichain/rpc-reference/bitcoin-rpc)
+* [Reown Litecoin RPC](https://docs.reown.com/advanced/multichain/rpc-reference/litecoin-rpc)
+* [Reown Dogecoin RPC](https://docs.reown.com/advanced/multichain/rpc-reference/dogecoin-rpc)

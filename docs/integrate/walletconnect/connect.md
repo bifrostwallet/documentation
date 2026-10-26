@@ -106,7 +106,7 @@ const { uri, approval } = await client.connect({
         "eth_signTypedData_v4",
       ],
       chains: ["eip155:14"],
-      events: ["accountsChanged", "chainChanged"],
+      events: [],
     },
   },
 });
@@ -125,7 +125,7 @@ const { uri, approval } = await client.connect({
     eip155: {
       methods: ["eth_accounts", "eth_sendTransaction", "personal_sign"],
       chains: ["eip155:14"],
-      events: ["accountsChanged", "chainChanged"],
+      events: [],
     },
     xrpl: {
       methods: ["xrpl_signTransaction"],
@@ -147,5 +147,5 @@ Prefer listing only methods you call. Bifrost may advertise additional methods i
 ## References
 
 * [Reown AppKit](https://docs.reown.com/appkit/overview)
-* [WalletConnect mobile linking](https://docs.walletconnect.network/wallet-sdk/ios/mobile-linking)
+* [WalletConnect mobile linking](https://docs.walletconnect.com/wallets/ios/mobile-linking)
 * [CAIP-10 account IDs](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-10.md)
