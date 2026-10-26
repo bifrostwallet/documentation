@@ -27,11 +27,11 @@ Submitting again updates a pending submission. To change a live listing later, g
 
 Upload **PNG or WebP** at least **128×128**. Larger images are fine; the form cover-fits and converts to the catalog form before hash/sign:
 
-* Opaque **128×128** WebP on a solid white background
-* Maximum file size **24 KB**
+* Exact **128×128** WebP. A transparent background is recommended. Opaque WebP, including a solid white background, stays valid
+* Maximum file size **24 KB**. Size checks require neither opacity nor a white background
 * Stored as `logo.webp`; `logoHash` is the SHA-256 of those WebP bytes
 
-Preview shows the **converted** WebP. New intake rejects anything that is not exactly this final form.
+Preview shows the **converted** WebP. New intake rejects logos that are not this **128×128** WebP within **24 KB**.
 
 ## What gets stored
 
