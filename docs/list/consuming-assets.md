@@ -127,10 +127,6 @@ For production or sensitive applications, **do not rely on GitHub’s CDN for lo
 
 Catalog logos are **WebP** (`logo.webp`). The listing form accepts PNG or WebP and converts before sign. Use each entry’s `logoURL` (WebP). Logos are **not** bundled in the NPM package; only URLs. Host those URLs from your own bucket or CDN when availability or trust in a third-party CDN matters.
 
-## Optional CDN / signed manifest
-
-If you operate your own static mirror, compare section hashes from `getSectionHashes()` to a published `manifest.json`, then verify with `verifyManifest` (`MANIFEST_PUBLIC_KEY` is exported from the package). Prefer the NPM package for data, and your own bucket or CDN for logos.
-
 ## Migration note
 
 Token lists and the provider registry both come from this package. `@towolabs/tokens` and [`ftso-signal-providers`](https://github.com/TowoLabs/ftso-signal-providers) are superseded by `@bifrostwallet/assets`.
