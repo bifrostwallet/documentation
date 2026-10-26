@@ -15,7 +15,7 @@ Dapp entries are curated in [`bifrostwallet/assets`](https://github.com/bifrostw
 | `title` | 2–32 characters |
 | `description` | 10–350 characters (printable ASCII) |
 | `url` | `https` only; paths allowed; **no query parameters** |
-| `logo` | Upload **PNG or WebP**, at least **128×128** (larger OK); form resizes to opaque **128×128** WebP ≤24 KB (`logo.webp`) |
+| `logo` | Upload **PNG or WebP**, at least **128×128** (larger OK); form resizes to **128×128** WebP ≤24 KB (`logo.webp`). A transparent background is recommended. Opaque WebP, including a solid white background, stays valid. Size checks require neither opacity nor a white background |
 | `chains` | One or more Bifrost-supported CAIP-2 chains (Flare, Songbird, and other mainnets offered in the form) |
 | `category` | `dex`, `yield`, `nft`, `games`, or `other` |
 | `categoryOther` | Required in the signed submission when `category` is `other` (2–32 characters); curators map it before catalog publish |
@@ -28,16 +28,15 @@ Entries live under `data/dapps/<slug>/` where `slug` is derived from the hostnam
 ```json title="info.json"
 {
   "title": "SparkDEX",
-  "description": "Decentralized exchange on the Flare Network.",
+  "description": "SparkDEX is a decentralized exchange on Flare for swapping tokens through automated market makers. Its docs also describe a perpetual-trading exchange.",
   "url": "https://sparkdex.ai",
   "logoURL": "dapps/sparkdex-ai/logo.webp",
-  "chains": ["eip155:14"],
-  "category": "dex",
-  "featured": false
+  "logoHash": "772fb06ca874c15344a5f8e3a3d09b7e675179f5592ad45d2d4309aabfb76162",
+  "chains": ["eip155:14"]
 }
 ```
 
-`logoURL` is stored as a relative path and resolved by consumers against their asset base URL.
+`logoURL` is stored as a relative path and resolved by consumers against their asset base URL. Category chips live in `data/dapps/categories.json`.
 
 ## How to request a listing
 
