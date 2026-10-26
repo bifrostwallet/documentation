@@ -106,7 +106,7 @@ const { uri, approval } = await client.connect({
         "eth_signTypedData_v4",
       ],
       chains: ["eip155:14"],
-      events: ["accountsChanged", "chainChanged"],
+      events: [],
     },
   },
 });
@@ -125,7 +125,7 @@ const { uri, approval } = await client.connect({
     eip155: {
       methods: ["eth_accounts", "eth_sendTransaction", "personal_sign"],
       chains: ["eip155:14"],
-      events: ["accountsChanged", "chainChanged"],
+      events: [],
     },
     xrpl: {
       methods: ["xrpl_signTransaction"],

@@ -82,7 +82,7 @@ const { uri, approval } = await client.connect({
         "eth_signTypedData_v4",
       ],
       chains: [chainId],
-      events: ["accountsChanged", "chainChanged"],
+      events: [],
     },
   },
 });
