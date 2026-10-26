@@ -28,16 +28,15 @@ Entries live under `data/dapps/<slug>/` where `slug` is derived from the hostnam
 ```json title="info.json"
 {
   "title": "SparkDEX",
-  "description": "Decentralized exchange on the Flare Network.",
+  "description": "SparkDEX is a decentralized exchange on Flare for swapping tokens through automated market makers. Its docs also describe a perpetual-trading exchange.",
   "url": "https://sparkdex.ai",
   "logoURL": "dapps/sparkdex-ai/logo.webp",
-  "chains": ["eip155:14"],
-  "category": "dex",
-  "featured": false
+  "logoHash": "772fb06ca874c15344a5f8e3a3d09b7e675179f5592ad45d2d4309aabfb76162",
+  "chains": ["eip155:14"]
 }
 ```
 
-`logoURL` is stored as a relative path and resolved by consumers against their asset base URL.
+`logoURL` is stored as a relative path and resolved by consumers against their asset base URL. Category chips live in `data/dapps/categories.json`.
 
 ## How to request a listing
 
