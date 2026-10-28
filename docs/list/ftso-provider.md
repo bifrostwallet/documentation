@@ -53,7 +53,7 @@ Each provider lives under `data/providers/<eip155-14|eip155-19>/<identityAddress
 
 Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON is your listing text, `identityAddress`, `acknowledgedResponsibilities`, and `logoHash`. It excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, `firstTransaction`, and the chain snapshot (`delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators`).
 
-The signature requirement is a **self-signature** by your identity address. Entries that predate the repository's public launch are grandfathered until **1 November 2026**; after that date, entries without a valid self-signature are delisted until signed.
+The signature requirement is a **self-signature** by your identity address. Entries that predate the repository's public launch are grandfathered until **31 December 2026**; after that date, entries without a valid self-signature are delisted until signed.
 
 ### Domain linkage (optional, recommended)
 
@@ -102,7 +102,7 @@ Curator bar for new `listed: true`:
 | **Flare** | Self-bond ≥ **10M FLR**; ≥ **2** validators; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **100M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
 | **Songbird** | WSGB vote power ≥ **50M** |
 
-**Grandfathering:** providers listed before the repository went public keep `listed: true` until **1 November 2026** without completing domain linkage or ownership signatures. From that date, listed providers without `domainLinked: true` and a valid self-signature are delisted, and relisted when the requirements are met.
+**Grandfathering:** providers listed before the repository went public keep `listed: true` until **31 December 2026** without completing domain linkage or ownership signatures. After that date, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted, and relisted when the requirements are met.
 
 ### Guidance for apps that consume provider data
 
