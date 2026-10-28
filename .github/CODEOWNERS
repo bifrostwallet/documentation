@@ -13,6 +13,4 @@
 /.git-hooks/ @RareData
 /scripts/security/ @RareData
 /.github/dependabot.yml @RareData
-/patches/ @RareData
-/Dockerfile @RareData
 /cloudbuild.yaml @RareData

@@ -32,7 +32,7 @@
         "noUnusedImports": "error",
         "useExhaustiveDependencies": "error",
         "useParseIntRadix": "error",
-        // Biome cannot resolve packages via Yarn PnP yet (see base-repository docs).
+        // Biome cannot resolve packages via Yarn PnP yet.
         "noUnresolvedImports": "off"
       },
       "complexity": {
