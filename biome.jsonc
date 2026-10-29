@@ -93,26 +93,7 @@
       "lineEnding": "lf"
     }
   },
-  // Throwaway keys / vectors in tests and fixtures — keep scanning production src.
   "overrides": [
-    {
-      "includes": [
-        "**/test/**",
-        "**/tests/**",
-        "**/__tests__/**",
-        "**/fixtures/**",
-        "**/__fixtures__/**",
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/*.spec.ts",
-        "**/*.spec.tsx"
-      ],
-      "linter": {
-        "rules": {
-          "security": { "noSecrets": "off" }
-        }
-      }
-    },
     {
       // CLI / security scripts use stderr for user-facing errors.
       // CSP HTML rewrites trip noSecrets entropy on attribute strings.
