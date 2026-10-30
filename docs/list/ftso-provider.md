@@ -99,7 +99,7 @@ Curator bar for new providers to receive `listed: true` is still to be determine
 
 | Network | Guideline |
 | --- | --- |
-| **Flare** | Self-bond ≥ **9M FLR**; ≥ **1** validators; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **90M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
+| **Flare** | Self-bond ≥ **9M FLR**; ≥ **1** validator; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **90M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
 | **Songbird** | WSGB vote power ≥ **25M** |
 
 **Grandfathering:** providers listed before the repository went public keep `listed: true` until at least **31 December 2026** without completing domain linkage or ownership signatures. After that date (date to be finalized together with the existing provider community), listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted, and relisted when the requirements are met.
