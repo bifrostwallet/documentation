@@ -98,7 +98,7 @@ Each provider entry (`data/providers/<chain>/<identityAddress>/info.json`):
 | `dualNetwork` | Same brand on Flare and Songbird |
 | `firstTransaction` | Earliest known on-chain activity (may be absent) |
 
-Ownership proof lives in `signatures.json` beside each entry. Pre-public entries stay grandfathered until **31 December 2026**. After that date, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted.
+Ownership proof lives in `signatures.json` beside each entry. Pre-public entries stay grandfathered until at least **31 December 2026**. After that date (to be finally determined together with the existing providers), listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted.
 
 ## Without NPM
 
