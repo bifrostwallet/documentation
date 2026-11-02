@@ -15,10 +15,10 @@ substitutions:
   _LOGS_BUCKET: ''
   _DEPLOY_BUCKET: ''
 steps:
-  - name: node:24.22.1@sha256:5630d96570d4ca4a8523fda3d169d0114554d0f48293e1ae3db6be7c79b42a17
+  - name: node:24.22.1@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea
     entrypoint: bash
     args: ['-c', './yarn install --immutable']
-  - name: node:24.22.1@sha256:5630d96570d4ca4a8523fda3d169d0114554d0f48293e1ae3db6be7c79b42a17
+  - name: node:24.22.1@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea
     entrypoint: bash
     args: ['-c', './yarn build']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest@sha256:aa2b2728a6f3eaf1d6d37409133fde8220b28460282f6983e3055b1b2c792228'
