@@ -12,7 +12,15 @@ To list a provider, follow [FTSO provider](ftso-provider.md) and the [assets REA
 npm install @bifrostwallet/assets@<version> --save-exact
 ```
 
-Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifrostwallet/assets@<version> --save-exact`. Commit the lockfile with that pin. Upgrade only when you want a newer catalog, then upload that release’s provider icons again.
+Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifrostwallet/assets@<version> --save-exact`. Commit the lockfile with that pin.
+
+`--save-exact` pins the catalog you chose. A newer release cannot slip in until you change that pin. Yarn `--exact` and pnpm `--save-exact` do the same thing.
+
+## Refresh logos when you bump
+
+A version bump is incomplete until you refresh icons.
+
+Download the git tag for the new pin before you ship. The tag is `v` plus the package version. Upload that release’s `providers/**/logo.webp` files to your CDN or backend, and keep the relative paths.
 
 ## Provider lookup
 
@@ -53,9 +61,15 @@ The package entry is CommonJS. `require("@bifrostwallet/assets")` exposes the sa
 
 Each listing’s `logoURL` is a relative path, such as `providers/eip155-14/<identity>/logo.webp`. `logoHash` is the SHA-256 of that file. The npm package does not include logo files.
 
-After you version-lock the package, download that same tagged GitHub release, or clone that tag, once in your build. The tag is `v` plus the package version. Upload `providers/**/logo.webp` from that tag to a CDN or backend you control, and keep the relative paths. Pinning the tag to the package version keeps those files matched to `logoHash`.
+After you version-lock the package, download that same tagged GitHub release, or clone that tag, once in your build. The tag is `v` plus the package version. Upload `providers/**/logo.webp` from that tag to a CDN or backend you control, and keep the relative paths. Do this again for every new pin. A version bump that skips the upload is incomplete.
 
-Always pass that host to `resolveAssetURL(logoURL, base)`. The example base `https://cdn.example.com/assets/` is the directory that contains `providers/`. Serve every logo from the base you pass in. GitHub and Bifrost’s CDN are not logo hosts for your app.
+`resolveAssetURL(logoURL, base)` only joins the relative path to the base you pass. The example base `https://cdn.example.com/assets/` is the directory that contains `providers/`. When you pass a base, the call does not fall back to GitHub or to Bifrost’s CDN.
+
+A listing whose file is missing on your host is a broken image. Your host returns 404. That is typical for a provider added in the new catalog, until you upload its logo.
+
+A path you already uploaded keeps showing the old file. If the catalog logo changed, that file is stale, and `logoHash` no longer matches.
+
+Pass your host on every call. A GitHub raw fallback runs only when you omit the base or pass an empty one. Do not use that fallback.
 
 `resolveAssetURL` works the same way for any listing’s `logoURL` (tokens and dapps included).
 
@@ -63,47 +77,47 @@ Catalog logos are WebP (`logo.webp`).
 
 ## Optional checks
 
-Most apps can skip this. The package has no helper for these checks.
+Most apps can skip this. There are two checks. There is no signature over the curated catalog yet.
 
-### Compare logo bytes to `logoHash`
+### Logo hash
 
-`logoHash` is the SHA-256 of the logo file. It is 64 lowercase hex characters, with no `0x` prefix. Hash the bytes you fetched from your own host, and compare that digest to `logoHash`.
+`logoHash` is the SHA-256 of `logo.webp`, as 64 lowercase hex characters, with no `0x` prefix. Hash the bytes you serve and compare them to `provider.logoHash`. A match means that CDN file was not swapped. Use the platform you already have. Do not add a dependency for this.
 
-```javascript title="logo-hash.js"
-const bytes = new Uint8Array(await (await fetch(logoURL)).arrayBuffer());
-const digest = await crypto.subtle.digest("SHA-256", bytes);
+Node:
+
+```js
+import { createHash } from "node:crypto";
+
+const digest = createHash("sha256").update(logoBytes).digest("hex");
+if (digest !== provider.logoHash) throw new Error("logo hash mismatch");
+```
+
+Browsers, with Web Crypto:
+
+```js
+const digest = await crypto.subtle.digest("SHA-256", logoBytes);
 const hex = [...new Uint8Array(digest)]
   .map((byte) => byte.toString(16).padStart(2, "0"))
   .join("");
-
-if (hex !== provider.logoHash) {
-  throw new Error("Logo bytes do not match logoHash");
-}
+if (hex !== provider.logoHash) throw new Error("logo hash mismatch");
 ```
 
-In Node, `createHash("sha256").update(bytes).digest("hex")` from `node:crypto` returns the same hex string.
+### Provider signature
 
-### Check provider signatures
+The operator signature covers the signed fields: name, description, logo hash, website, links, identity, and the responsibilities acknowledgement. `logoHash` is one of those fields. Curator fields such as `listed` are not in that payload.
 
-The operator signature covers the signed listing fields, including `logoHash`. `signatures.json` is in the git tag, not in the npm package. Clone tag `v<version>` of [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets) and run the check there.
+`signatures.json` is in the git listing. It is not in the npm package. Clone or download the same tag (`v` plus the package version) and, in that checkout, run:
 
 ```bash
-git clone --depth 1 --branch v<version> https://github.com/bifrostwallet/assets.git
-cd assets
-./yarn install
 ./yarn verify:providers
 ```
 
-`viem` is a dev dependency of that repository. The published package does not depend on it. Do not add `viem` to your app.
+That script uses `viem` as a dev dependency of [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Do not add `viem` to your production app.
 
-Self-signatures are grandfathered until 31 December 2026. Until that date, run `./yarn verify:providers` without `--strict`. After that date, run `./yarn verify:providers --strict`.
+Self-signatures are grandfathered until 31 December 2026. `./yarn verify:providers` without `--strict` is the current check. `--strict` requires a self-signature on every provider, and that mode waits until after 31 December 2026.
 
-## Confirm npm provenance
+## Provenance
 
-Trusted Publishing uses OIDC. On the npm version page, a green check means npm linked that publish to the source commit. See [Viewing package provenance](https://docs.npmjs.com/viewing-package-provenance/).
+Releases are staged with npm Trusted Publishing (OIDC). The publish step sets `NPM_CONFIG_PROVENANCE`. The workflow is [`.github/workflows/release.yml`](https://github.com/bifrostwallet/assets/blob/main/.github/workflows/release.yml).
 
-```bash
-npm audit signatures
-```
-
-`npm audit signatures` checks the registry signatures of the packages in your install.
+Confirm the green check on the npm version page. You can also run `npm audit signatures`. See [Viewing package provenance](https://docs.npmjs.com/viewing-package-provenance/).
