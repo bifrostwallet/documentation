@@ -1,128 +1,58 @@
 # Consuming Assets
 
-Use Bifrost’s curated asset data in your own application. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Published as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) (zero runtime dependencies).
+The supported way to consume Bifrost’s curated listings is [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets): an audited, zero-dependency package. Version-lock the release you ship, and read listings from that package. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
+
+To list a provider, follow [FTSO provider](ftso-provider.md) and the [assets README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
 ## Install
 
 ```bash
-npm install @bifrostwallet/assets
+npm install @bifrostwallet/assets --save-exact
 ```
 
-Or install with Yarn or pnpm using the same package name.
+Yarn: `yarn add @bifrostwallet/assets --exact`. pnpm: `pnpm add @bifrostwallet/assets --save-exact`. Commit the lockfile with that pin. Upgrade only when you want a newer catalog, then upload that release’s provider icons again.
 
-## Quick start
+## Provider lookup
 
-Examples use **Bifrost Wallet** on Flare (`eip155:14`).
+Chain ids are CAIP-2. These examples use Bifrost Wallet on Flare (`eip155:14`). `getProvider` matches `identityAddress` case-insensitively and returns `null` when that identity is not in this package version. An unknown chain id throws.
 
 ```typescript title="example.ts"
 import {
-  getProvider,
   getListedProviders,
-  findProviderByValidator,
-  getNativeToken,
-  getToken,
-  getContract,
-  getContracts,
-  CONTRACT_CATEGORY_LABELS,
+  getProvider,
+  resolveAssetURL,
 } from "@bifrostwallet/assets";
 
-// Chain ids are CAIP-2 (e.g. "eip155:14", "eip155:19")
-const bifrost = getProvider("eip155:14", "0x1650d2760baee638c034200dedcbe17b050d0364");
-const logoURL = bifrost?.logoURL; // already absolute in the published package
+// Picker / discovery: listed: true only
+const listed = getListedProviders("eip155:14");
 
-const byNode = findProviderByValidator(
+// Confirmations and details, including entries that are not listed.
+// This identity is Bifrost Wallet. getProvider returns null when it is absent.
+const provider = getProvider(
   "eip155:14",
-  "NodeID-5oLazJm5PtV8JFb2GpzuCVMZdi1GxkwYP",
-); // → Bifrost Wallet
+  "0x1650d2760baee638c034200dedcbe17b050d0364",
+);
+if (!provider) throw new Error("Provider is not in this package version");
 
-const picker = getListedProviders("eip155:14"); // listed: true only
-
-const flr = getNativeToken("eip155:14"); // address === null
-// WNAT / WFLR on Flare (lookup is case-insensitive)
-const wflr = getToken("eip155:14", "0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d");
-
-// Transaction-review names. Lookup is case-insensitive. null when unknown.
-const pool = getContract("eip155:14", "0x3A06584A47972fF7005301b5A44c7D2214A4d3b4");
-// pool?.projectName === "Bifrost Wallet"
-// pool?.contractName === "Collateral Pool"
-// pool?.category === "fassets"
-// pool && CONTRACT_CATEGORY_LABELS[pool.category] === "FAssets"
-// pool?.logoURL ends with "dapps/bifrostwallet-com/logo.webp"
-// pool?.logoHash is the SHA-256 of that dapp logo
-const flareContracts = getContracts("eip155:14");
-const everyContract = getContracts();
+const logoURL = resolveAssetURL(
+  provider.logoURL,
+  "https://cdn.example.com/assets/",
+);
 ```
 
-CommonJS:
+The package entry is CommonJS. `require("@bifrostwallet/assets")` exposes the same `getListedProviders`, `getProvider`, and `resolveAssetURL`.
 
-```js
-const {
-  getProvider,
-  getListedProviders,
-  getNativeToken,
-  getContract,
-  CONTRACT_CATEGORY_LABELS,
-} = require("@bifrostwallet/assets");
-
-const bifrost = getProvider("eip155:14", "0x1650d2760baee638c034200dedcbe17b050d0364");
-const pool = getContract("eip155:14", "0x3a06584a47972ff7005301b5a44c7d2214a4d3b4");
-// pool && CONTRACT_CATEGORY_LABELS[pool.category] === "FAssets"
-```
-
-Bump the package version to pick up data releases.
-
-## Visibility for providers
-
-| UI | Rule |
+| UI | Call |
 | --- | --- |
-| Provider **picker** / discovery | Show only `listed: true` (`getListedProviders`) |
-| Already-selected provider (confirmations, details) | Show the entry even if `listed` is false (`getProvider` / `getProviders`) |
+| Provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
+| Confirmations and details | `getProvider`, including entries with `listed: false` |
 
-Beyond `listed`, entries carry curator-maintained metadata you can surface: `managementGroup` (that network’s FTSO Management Group membership; Flare and Songbird each have their own group), `domainLinked` (verified website↔identity linkage), `dualNetwork` (same brand on both Flare and Songbird), and `firstTransaction` (earliest known on-chain activity; useful for "active since" displays). These fields are not covered by the provider's ownership signature.
+## Logos
 
-## Provider data model
+Each listing’s `logoURL` is a relative path, such as `providers/eip155-14/<identity>/logo.webp`. The package includes the provider icon files at those paths. Upload `providers/**/logo.webp` to a CDN or backend you control, and keep the relative paths.
 
-Each provider entry (`data/providers/<chain>/<identityAddress>/info.json`):
+Always pass that host to `resolveAssetURL(logoURL, base)`. The example base `https://cdn.example.com/assets/` is the directory that contains `providers/`. Serve every logo from the base you pass in. GitHub and Bifrost’s CDN are not logo hosts for your app.
 
-| Field | Notes |
-| --- | --- |
-| `name`, `description`, `websiteURL`, `links` | Self-reported, covered by the provider signature |
-| `identityAddress` | Canonical key (lowercased); covered by the provider signature |
-| `delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators` | On-chain snapshot, including validator NodeIDs. Not covered by the signature; a nightly job may refresh them |
-| `acknowledgedResponsibilities` | Portal checkbox (`true` for new submissions); signature-covered |
-| `logoHash` | SHA-256 of `logo.webp`, signature-covered integrity anchor |
-| `logoURL` | Relative in git; **absolute** (GitHub raw by default) in the NPM package |
-| `listed` | Curator-granted flag for provider-picker UIs |
-| `managementGroup` | That network’s FTSO Management Group membership. Flare and Songbird each have their own group |
-| `domainLinked` | Website↔identity linkage, refreshed periodically |
-| `dualNetwork` | Same brand on Flare and Songbird |
-| `firstTransaction` | Earliest known on-chain activity (may be absent) |
+`resolveAssetURL` works the same way for any listing’s `logoURL` (tokens and dapps included).
 
-Ownership proof lives in `signatures.json` beside each entry. Pre-public entries stay grandfathered until at least **31 December 2026**. After that date (to be finally determined together with the existing providers), listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted.
-
-## Without NPM
-
-**Not recommended.** Prefer the NPM package so you get typed helpers, baked-in data, and release versioning. Fetching GitHub raw aggregates is a fallback only:
-
-```
-https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/eip155-14/all.json
-https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/eip155-14/all.json
-```
-
-Contract names are `getContract` / `getContracts`. The package bundles them at build time from `data/contracts/<chain>/<address>.json`. `projectName` is the dapp title, and `logoURL` / `logoHash` are copies of that dapp's logo. There is no `data/contracts/<chain>/all.json` and no `data/dapps/all.json`. Aggregates are only the provider and token lists above.
-
-Dapp browser chips are `getDappCategories()`, bundled from `data/dapps/categories.json` (also at `dapps/categories.json` in this package). Chip order is featured, dex, lending, yield, staking, bridges, marketplaces, social, games, other. That file is hand-ordered and is not an `all.json`.
-
-Relative `logoURL` values in git resolve against:
-
-```
-https://raw.githubusercontent.com/bifrostwallet/assets/main/data/
-```
-
-(that is the default base for `resolveAssetURL`).
-
-For production or sensitive applications, **do not rely on GitHub’s CDN for logos**. Mirror catalog media to your own bucket or CDN and resolve `logoURL` against that base (or rewrite absolute URLs after install).
-
-## Logo / media format
-
-Catalog logos are **WebP** (`logo.webp`). The listing form accepts PNG or WebP and converts before sign. Use each entry’s `logoURL` (WebP). Logos are **not** bundled in the NPM package; only URLs. Host those URLs from your own bucket or CDN when availability or trust in a third-party CDN matters.
+Catalog logos are WebP (`logo.webp`).
