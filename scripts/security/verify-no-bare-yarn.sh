@@ -3,6 +3,9 @@
 # Reject command-like bare `yarn <subcommand>` in workflows, hooks, scripts, and docs.
 # Allowed: ./yarn …, yarnPath, yarn.lock, yarn@…, prose about Yarn the tool,
 # and the generated yarn.lock header.
+# docs/ may show consumer `yarn add` and `yarn remove`. Other bare subcommands
+# in docs (install, run, build, lint, …) still fail. Workflows, hooks, scripts,
+# package.json, and README.md still reject every bare subcommand, including add.
 # POSIX sh + grep -E (no bash, no ripgrep).
 
 set -eu
@@ -18,6 +21,9 @@ cd "$ROOT"
 # Bare yarn + common subcommands (not ./yarn).
 PATTERN='(^|[^./[:alnum:]_-])yarn[[:space:]]+(install|add|remove|run|test|build|lint|typecheck|workspace|workspaces|dlx|exec|node|npm|set|config|why|info|pack|publish|link|unlink|up|upgrade|dedupe|constraints|plugin|version|init|create|explain|search|stage|unplug)([[:space:]]|$)'
 
+# docs/ keeps every subcommand above except consumer add/remove examples.
+DOCS_PATTERN='(^|[^./[:alnum:]_-])yarn[[:space:]]+(install|run|test|build|lint|typecheck|workspace|workspaces|dlx|exec|node|npm|set|config|why|info|pack|publish|link|unlink|up|upgrade|dedupe|constraints|plugin|version|init|create|explain|search|stage|unplug)([[:space:]]|$)'
+
 FILE_LIST=$(mktemp)
 OUT_LIST=$(mktemp)
 trap 'rm -f "$FILE_LIST" "$OUT_LIST"' EXIT INT TERM
@@ -31,7 +37,11 @@ while IFS= read -r file || [ -n "$file" ]; do
   case "$file" in
     */yarn.lock|*/node_modules/*|*/.yarn/cache/*|*/.yarn/releases/*|*/verify-no-bare-yarn.sh) continue ;;
   esac
-  file_matches=$(grep -nE "$PATTERN" "$file" 2>/dev/null || true)
+  pattern=$PATTERN
+  case "$file" in
+    ./docs/*|docs/*) pattern=$DOCS_PATTERN ;;
+  esac
+  file_matches=$(grep -nE "$pattern" "$file" 2>/dev/null || true)
   if [ -n "$file_matches" ]; then
     printf '%s\n' "$file_matches" | while IFS= read -r line || [ -n "$line" ]; do
       [ -z "$line" ] && continue
