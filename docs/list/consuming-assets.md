@@ -1,10 +1,10 @@
 # Consuming Assets
 
-Most consumers are dapps and frontends. Pin [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets), copy the logo trees you serve onto a host you control, and read listings from the package or from one JSON file on that same host. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
+Most consumers only have a frontend. Pin [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) and import it in the app, or read it on a backend and serve JSON. Both paths should self-host logos. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
 To list a provider, follow [FTSO provider](ftso-provider.md).
 
-## 1. Pin the package
+## Pin the package
 
 ```bash
 npm install @bifrostwallet/assets@<version> --save-exact
@@ -14,7 +14,9 @@ Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifro
 
 `--save-exact` and `--exact` pin one version so a newer catalog cannot slip in unnoticed. Commit the lockfile.
 
-## 2. Copy logos when you adopt or bump
+## Self-host logos
+
+Host the logo files yourself, for example on Cloud Storage or S3. Upload them from CI, from the git tag that matches the pinned package version. Both package paths below pass that host as `base`.
 
 Do this the first time, and again every time you bump the pin, before you ship. The git tag is `v` plus the package version. Logo files are not in the npm package.
 
@@ -27,7 +29,75 @@ From that tag, copy every logo tree you serve to your CDN or backend. Keep the r
 
 Published contract records include `project`, `projectName`, `logoURL`, and `logoHash`. Contracts are no longer linked to dapps. A published `logoURL` is `contracts/projects/<slug>/logo.webp`, or that contract’s own logo when the file beside its JSON is present.
 
-If you want one hosted JSON file, write it from the package in the same step and upload it next to the logos. Name the file whatever you want.
+A version bump without this upload is incomplete. A new provider whose file you did not upload is a 404 from your host. A path you already uploaded keeps the old file, and `logoHash` no longer matches if the logo changed.
+
+Copy commands are in [Upload examples](#upload-examples).
+
+`logoURL` in the package is a relative path. Pass your host to `resolveAssetURL(logoURL, base)`. When you pass a base, it joins that path to your host. The example base is the directory that contains `providers/`, `tokens/`, `dapps/`, and `contracts/`.
+
+If `base` is omitted or empty, `resolveAssetURL` falls back to GitHub (`https://raw.githubusercontent.com/bifrostwallet/assets/main/data/`, the `main` branch). That works, but it is not recommended: GitHub raw is not a CDN, it is rate-limited, and it serves `main` rather than the pinned version.
+
+## Frontend
+
+Install with an exact pin, as above. Import the package in the app. The catalog is in the bundle. Call `resolveAssetURL(logoURL, base)` in the browser. `base` is your logo host.
+
+```tsx title="FlareTokenList.tsx"
+import { getTokens, resolveAssetURL } from "@bifrostwallet/assets";
+
+const base = "https://cdn.example.com/assets/";
+
+export function FlareTokenList() {
+  const tokens = getTokens("eip155:14");
+  return (
+    <ul>
+      {tokens.map((token) => (
+        <li key={token.address ?? "native"}>
+          <img alt="" src={resolveAssetURL(token.logoURL, base)} />
+          {token.symbol}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+`getTokens("eip155:14")` is the Flare list, including the native gas token (`address` is `null`). Chain ids are CAIP-2. An unknown chain id throws. The package entry is CommonJS. `require("@bifrostwallet/assets")` exposes the same functions.
+
+Provider pickers use the same `base`:
+
+```typescript title="providers.ts"
+import {
+  getListedProviders,
+  getProvider,
+  resolveAssetURL,
+} from "@bifrostwallet/assets";
+
+const base = "https://cdn.example.com/assets/";
+
+// Comparison lists and pickers: listed: true only
+const listed = getListedProviders("eip155:14");
+
+// Confirmations and details, including entries that are not listed.
+// This identity is Bifrost Wallet. getProvider returns null when it is absent.
+const provider = getProvider(
+  "eip155:14",
+  "0x1650d2760baee638c034200dedcbe17b050d0364",
+);
+const logoURL = provider && resolveAssetURL(provider.logoURL, base);
+```
+
+`getProvider` matches `identityAddress` case-insensitively.
+
+| UI | Call |
+| --- | --- |
+| Comparison lists and provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
+| Confirmations and details | `getProvider`, including entries with `listed: false` |
+
+`resolveAssetURL` works the same way for any listing’s `logoURL` (token icons, dapp icons, and contract logos). Pass that listing’s `logoURL`. Catalog logos are WebP.
+
+## Backend
+
+Read the package on the server, resolve URLs there, and serve JSON. The frontend fetches that JSON and does not install the package. `logoURL` values in the response are already absolute.
 
 ```js
 import { writeFileSync } from "node:fs";
@@ -41,54 +111,34 @@ const listed = getListedProviders("eip155:14").map((provider) => ({
 writeFileSync("flare-providers.json", JSON.stringify(listed));
 ```
 
-`getListedProviders` is the comparison list and picker (`listed: true` only). Use `getProviders` when the file should also include providers that are not listed.
+`getListedProviders` is the comparison list and picker (`listed: true` only). Use `getProviders` when the file should also include providers that are not listed. The same pattern works for `getTokens`. Upload the file next to the logos if you want one hosted JSON file. Name it whatever you want. One request. Its `logoURL` values already point at your host.
 
-A version bump without this upload is incomplete. A new provider whose file you did not upload is a 404 from your host. A path you already uploaded keeps the old file, and `logoHash` no longer matches if the logo changed.
+## Without the package (backwards compatible, not recommended) {#without-the-package}
 
-Copy commands are in [Upload examples](#upload-examples).
+Use this only when a frontend cannot install `@bifrostwallet/assets`. Prefer the package paths above. GitHub raw is not a CDN, and it is rate-limited. Pin a release tag `v<version>` (`v` plus the package version). Do not fetch `main`.
 
-## 3. Read listings
+`all.json` exists only for tokens and providers, one file per chain directory. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon. There is no combined `data/tokens/all.json`.
 
-Import the helpers, or fetch the one file you uploaded. You do not call GitHub or Bifrost.
+```js
+const tag = "v<version>";
+const base = `https://raw.githubusercontent.com/bifrostwallet/assets/${tag}/data/`;
 
-```typescript title="example.ts"
-import {
-  getListedProviders,
-  getProvider,
-  resolveAssetURL,
-} from "@bifrostwallet/assets";
-
-// Comparison lists and pickers: listed: true only
-const listed = getListedProviders("eip155:14");
-
-// Confirmations and details, including entries that are not listed.
-// This identity is Bifrost Wallet. getProvider returns null when it is absent.
-const provider = getProvider(
-  "eip155:14",
-  "0x1650d2760baee638c034200dedcbe17b050d0364",
+const tokens = await fetch(new URL("tokens/eip155-14/all.json", base)).then((res) =>
+  res.json(),
 );
-if (!provider) throw new Error("Provider is not in this package version");
-
-const logoURL = resolveAssetURL(
-  provider.logoURL,
-  "https://cdn.example.com/assets/",
+const providers = await fetch(new URL("providers/eip155-14/all.json", base)).then(
+  (res) => res.json(),
 );
+
+const tokensWithLogos = tokens.map((token) => ({
+  ...token,
+  logoURL: new URL(token.logoURL, base).href,
+}));
 ```
 
-Chain ids are CAIP-2. `getProvider` matches `identityAddress` case-insensitively. An unknown chain id throws. The package entry is CommonJS. `require("@bifrostwallet/assets")` exposes the same functions.
+A token `logoURL` is relative to `data/`: `tokens/eip155-14/<address>/logo.webp`, `tokens/eip155-14/native/logo.webp`, or `tokens/xrpl-0/<issuer>/<currency>/logo.webp`. `new URL(logoURL, base)` joins that path to the tag. Songbird providers are `providers/eip155-19/all.json`. Other token chains are the same shape as `tokens/eip155-14/all.json`.
 
-| UI | Call |
-| --- | --- |
-| Comparison lists and provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
-| Confirmations and details | `getProvider`, including entries with `listed: false` |
-
-`logoURL` in the package is a relative path. Always pass your host to `resolveAssetURL(logoURL, base)`. When you pass a base, it only joins that path to your host. It does not fall back to GitHub or Bifrost’s CDN. The example base is the directory that contains `providers/`, `tokens/`, `dapps/`, and `contracts/`. GitHub and Bifrost’s CDN are not logo hosts.
-
-The GitHub raw fallback runs only when you omit the base or pass an empty base. Do not omit the base.
-
-`resolveAssetURL` works the same way for any listing’s `logoURL` (token icons, dapp icons, and contract logos). Pass that listing’s `logoURL`, as the examples do with `provider.logoURL`. Catalog logos are WebP.
-
-If you uploaded `flare-providers.json`, fetch that URL. One request. Its `logoURL` values already point at your host.
+A provider `logoURL` in `all.json` is already an absolute `raw.githubusercontent.com` URL on `main`. `new URL` leaves an absolute URL unchanged, so those icons still come from `main`, not from the tag you fetched.
 
 ## Do and do not
 
@@ -98,11 +148,11 @@ DO NOT: depend on a `^` range. A newer catalog can slip in without a logo refres
 
 DO: at each pin bump, copy every logo tree you serve from the tag `v` plus the version onto a host you control, and keep the relative paths. Provider icons are `data/providers/**/logo.webp`. Token icons are `data/tokens/**/logo.webp`. Dapp icons are `data/dapps/**/logo.webp`. Contract logos are `data/contracts/**/logo.webp`. If you want one JSON file, generate it with `getListedProviders` or `getProviders` plus `resolveAssetURL`, and upload it next to the logos.
 
-DO NOT: fetch `all.json`, or logos, from GitHub raw, from the assets repository, or from Bifrost’s CDN at runtime. `all.json` in git is not a public consume API.
+DO NOT: build a new app on GitHub raw. [Without the package](#without-the-package) is backwards compatible and not recommended. Do not use Bifrost’s CDN as a logo host.
 
 DO: call `resolveAssetURL(logoURL, yourBase)` and serve icons from your host.
 
-DO NOT: omit the base. That falls back to GitHub. Do not serve icons from `node_modules`.
+DO NOT: serve icons from `node_modules`.
 
 DO: import `getListedProviders` and `getProvider` for a picker. Import `@bifrostwallet/assets/signatures` only if you will verify.
 
