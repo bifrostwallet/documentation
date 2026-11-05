@@ -2,15 +2,17 @@
 
 The supported way to consume Bifrost’s curated listings is [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets): an audited, zero-dependency package. Version-lock the release you ship, and read listings from that package. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
+Most consumers are dapps and frontends. Their main job is listing every listed provider in comparison lists and pickers.
+
 To list a provider, follow [FTSO provider](ftso-provider.md) and the [assets README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
 ## Install
 
 ```bash
-npm install @bifrostwallet/assets --save-exact
+npm install @bifrostwallet/assets@<version> --save-exact
 ```
 
-Yarn: `yarn add @bifrostwallet/assets --exact`. pnpm: `pnpm add @bifrostwallet/assets --save-exact`. Commit the lockfile with that pin. Upgrade only when you want a newer catalog, then upload that release’s provider icons again.
+Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifrostwallet/assets@<version> --save-exact`. Commit the lockfile with that pin. Upgrade only when you want a newer catalog, then upload that release’s provider icons again.
 
 ## Provider lookup
 
@@ -23,7 +25,7 @@ import {
   resolveAssetURL,
 } from "@bifrostwallet/assets";
 
-// Picker / discovery: listed: true only
+// Comparison lists and pickers: listed: true only
 const listed = getListedProviders("eip155:14");
 
 // Confirmations and details, including entries that are not listed.
@@ -44,12 +46,14 @@ The package entry is CommonJS. `require("@bifrostwallet/assets")` exposes the sa
 
 | UI | Call |
 | --- | --- |
-| Provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
+| Comparison lists and provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
 | Confirmations and details | `getProvider`, including entries with `listed: false` |
 
 ## Logos
 
-Each listing’s `logoURL` is a relative path, such as `providers/eip155-14/<identity>/logo.webp`. The package includes the provider icon files at those paths. Upload `providers/**/logo.webp` to a CDN or backend you control, and keep the relative paths.
+Each listing’s `logoURL` is a relative path, such as `providers/eip155-14/<identity>/logo.webp`. `logoHash` is the SHA-256 of that file. The npm package does not include logo files.
+
+After you version-lock the package, download that same tagged GitHub release, or clone that tag, once in your build. The tag is `v` plus the package version. Upload `providers/**/logo.webp` from that tag to a CDN or backend you control, and keep the relative paths. Pinning the tag to the package version keeps those files matched to `logoHash`.
 
 Always pass that host to `resolveAssetURL(logoURL, base)`. The example base `https://cdn.example.com/assets/` is the directory that contains `providers/`. Serve every logo from the base you pass in. GitHub and Bifrost’s CDN are not logo hosts for your app.
 
