@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) covers the package with no `base`, or `all.json` from a tag.
+Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) covers the package with no `base`, or `all.json` on `main`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
@@ -110,9 +110,9 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 ## 3. GitHub (backwards compatible) {#github-backwards-compatible}
 
-Use this when you are not hosting the logo files. Call `resolveAssetURL(logoURL)` with no `base`, or fetch `all.json` from a release tag without installing the package.
+Use this when you are not hosting the logo files.
 
-With no `base`, the helper joins the relative `logoURL` to GitHub raw. The current package uses `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/`. Once the version-tag change ships, that prefix is the git tag that matches the pinned version (`v` plus that version) instead of `main`.
+Call `resolveAssetURL(logoURL)` with no `base`. Logos load from GitHub at the tag that matches the installed version (`v` plus that version).
 
 ```tsx title="FlareTokenList.tsx"
 import { getTokens, resolveAssetURL } from "@bifrostwallet/assets";
@@ -125,25 +125,15 @@ const tokens = getTokens("eip155:14").map((token) => ({
 
 The same omitted `base` works in the backend example above.
 
-### Without the package
-
-Fetch one chain file from the release tag `v` plus the version. `all.json` exists for tokens and providers, one file per chain directory, such as `tokens/eip155-14/all.json` and `providers/eip155-14/all.json`.
+Without the package, fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/<chain>/all.json`, or the same path under `providers/`. These files track `main`. Each `logoURL` is already absolute, so render it as it is.
 
 ```js
-const tag = "v<version>";
-const base = `https://raw.githubusercontent.com/bifrostwallet/assets/${tag}/data/`;
+const tokens = await fetch(
+  "https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/eip155-14/all.json",
+).then((res) => res.json());
 
-const tokens = await fetch(new URL("tokens/eip155-14/all.json", base)).then((res) =>
-  res.json(),
-);
-
-const withLogos = tokens.map((token) => ({
-  ...token,
-  logoURL: new URL(token.logoURL, base).href,
-}));
+const logoURL = tokens[0].logoURL;
 ```
-
-Provider logo URLs in `all.json` are already absolute and point at `raw.githubusercontent.com` on `main`, so `new URL` leaves them unchanged.
 
 ## Provenance
 
