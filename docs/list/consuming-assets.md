@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) covers the package with no `base`, or `all.json` on `main`.
+Self-hosting provider logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/providers` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) covers the package with no `base`, or `all.json` on `main`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
@@ -18,28 +18,28 @@ An exact pin keeps a newer catalog from arriving unnoticed. Commit the lockfile.
 
 ## 2. Self-hosted logos
 
-Upload `data/` from the git tag that matches the pinned version. The tag is `v` plus the package version. Logo files are not in the npm package. Do this the first time, and again every time you bump the pin, before you ship.
+Upload `data/providers` from the git tag that matches the pinned version. The tag is `v` plus the package version. Logo files are not in the npm package. Do this the first time, and again every time you bump the pin, before you ship.
 
-Host the files yourself, for example on Cloud Storage or S3, and upload them from CI. `base` is the URL of that `data/` directory. It contains `providers/`, `tokens/`, `dapps/`, and `contracts/`, for example `https://cdn.example.com/assets/`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+Host the files yourself, for example on Cloud Storage or S3, and upload them from CI. Keep the relative paths. `base` is the URL of the directory that contains `providers/`, for example `https://cdn.example.com/assets/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
-`logoURL` in the package is a relative path. `resolveAssetURL(logoURL, base)` joins it to your host. The [frontend](#frontend) and [backend](#backend) examples pass that `base`.
+`logoURL` in the package is a relative path. `resolveAssetURL(logoURL, base)` joins it to your host. The [frontend](#frontend) and [backend](#backend) examples pass that `base`. The same pattern works for tokens.
 
 ### Frontend {#frontend}
 
-Import the package in the app so the catalog is in the bundle. Call `resolveAssetURL(logoURL, base)` in the browser. The same `base` works for `getTokens`, `getListedProviders`, and `getProvider`. Chain ids are CAIP-2.
+Import the package in the app so the catalog is in the bundle. Call `resolveAssetURL(provider.logoURL, base)` in the browser. `getListedProviders` is the picker (`listed: true` only). `getProviders` includes the rest, and `getProvider(chainId, identityAddress)` returns one provider or `null`. Chain ids are CAIP-2. The address match is case-insensitive.
 
-```tsx title="FlareTokenList.tsx"
-import { getTokens, resolveAssetURL } from "@bifrostwallet/assets";
+```tsx title="FlareProviderList.tsx"
+import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
 
 const base = "https://cdn.example.com/assets/";
 
-export function FlareTokenList() {
+export function FlareProviderList() {
   return (
     <ul>
-      {getTokens("eip155:14").map((token) => (
-        <li key={token.address ?? "native"}>
-          <img alt="" src={resolveAssetURL(token.logoURL, base)} />
-          {token.symbol}
+      {getListedProviders("eip155:14").map((provider) => (
+        <li key={provider.identityAddress}>
+          <img alt="" src={resolveAssetURL(provider.logoURL, base)} />
+          {provider.name}
         </li>
       ))}
     </ul>
@@ -49,7 +49,7 @@ export function FlareTokenList() {
 
 ### Backend {#backend}
 
-Read the package on the server, resolve URLs with your `base`, and serve JSON. The frontend fetches that file and does not install the package. `getListedProviders` is `listed: true` only; `getProviders` includes the rest.
+Read the package on the server, resolve URLs with your `base`, and serve JSON. The frontend fetches that file and does not install the package.
 
 ```js
 import { writeFileSync } from "node:fs";
@@ -62,6 +62,8 @@ const listed = getListedProviders("eip155:14").map((provider) => ({
 }));
 writeFileSync("flare-providers.json", JSON.stringify(listed));
 ```
+
+Use `getProviders("eip155:14")` when the file should include providers that are not listed.
 
 ### Optional checks
 
@@ -112,27 +114,27 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 Use this when you are not hosting the logo files.
 
-Call `resolveAssetURL(logoURL)` with no `base`. Logos load from GitHub at the tag that matches the installed version (`v` plus that version).
+Call `resolveAssetURL(provider.logoURL)` with no `base`. Logos load from GitHub at the tag that matches the installed version (`v` plus that version).
 
-```tsx title="FlareTokenList.tsx"
-import { getTokens, resolveAssetURL } from "@bifrostwallet/assets";
+```tsx title="FlareProviderList.tsx"
+import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
 
-const tokens = getTokens("eip155:14").map((token) => ({
-  ...token,
-  logoURL: resolveAssetURL(token.logoURL),
+const providers = getListedProviders("eip155:14").map((provider) => ({
+  ...provider,
+  logoURL: resolveAssetURL(provider.logoURL),
 }));
 ```
 
 The same omitted `base` works in the backend example above.
 
-Without the package, fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/<chain>/all.json`, or the same path under `providers/`. These files track `main`. Each `logoURL` is already absolute, so render it as it is.
+Without the package, fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`. The directory name uses a hyphen (`eip155-14`). These files track `main`. Each `logoURL` is already absolute, so render it as it is.
 
 ```js
-const tokens = await fetch(
-  "https://raw.githubusercontent.com/bifrostwallet/assets/main/data/tokens/eip155-14/all.json",
+const providers = await fetch(
+  "https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/eip155-14/all.json",
 ).then((res) => res.json());
 
-const logoURL = tokens[0].logoURL;
+const logoURL = providers[0].logoURL;
 ```
 
 ## Provenance
