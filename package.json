@@ -45,12 +45,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.2"
   },
-  "resolutions": {
-    "qs": "6.16.0",
-    "serialize-javascript": "7.1.2",
-    "tinypool": "2.2.0",
-    "uuid": "14.0.2"
-  },
   "browserslist": [
     ">0.5%",
     "not dead",
