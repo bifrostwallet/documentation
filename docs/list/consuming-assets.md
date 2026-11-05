@@ -41,23 +41,19 @@ const listed = getListedProviders("eip155:14").map((provider) => ({
 
 ### Get all listed validators
 
-The package does not export a validator list. Each provider has `validators`, an array of NodeID strings. Listed validators are that field on the providers from `getListedProviders`.
+`getListedValidators(chainId)` returns the validators of providers with `listed: true`. Each entry has the validator NodeID and the owning provider’s identity address and name. A provider’s validators stay together, in `getProviders` order. `getValidators(chainId)` is the same list for every provider. `getValidatorsByIdentity(chainId, identityAddress)` matches the address without regard to case and returns `[]` when that provider has none.
 
 ```js
-import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
+import { getListedValidators, getValidatorsByIdentity } from "@bifrostwallet/assets";
 
-const base = "https://cdn.example.com/assets/";
-
-const listedValidators = getListedProviders("eip155:14").flatMap((provider) =>
-  provider.validators.map((nodeId) => ({
-    nodeId,
-    name: provider.name,
-    logoURL: resolveAssetURL(provider.logoURL, base),
-  })),
+const listedValidators = getListedValidators("eip155:14");
+const bifrostValidators = getValidatorsByIdentity(
+  "eip155:14",
+  "0x1650d2760baee638c034200dedcbe17b050d0364",
 );
 ```
 
-`findProviderByValidator(chainId, nodeId)` returns the provider for one NodeID, or `null`. It searches every provider on the chain. The NodeID must match the catalog, including the `NodeID-` prefix.
+`findProviderByValidator(chainId, nodeId)` returns the provider for one NodeID, or `null`.
 
 ### Optional checks
 
