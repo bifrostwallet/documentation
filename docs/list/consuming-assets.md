@@ -60,3 +60,50 @@ Always pass that host to `resolveAssetURL(logoURL, base)`. The example base `htt
 `resolveAssetURL` works the same way for any listing’s `logoURL` (tokens and dapps included).
 
 Catalog logos are WebP (`logo.webp`).
+
+## Optional checks
+
+Most apps can skip this. The package has no helper for these checks.
+
+### Compare logo bytes to `logoHash`
+
+`logoHash` is the SHA-256 of the logo file. It is 64 lowercase hex characters, with no `0x` prefix. Hash the bytes you fetched from your own host, and compare that digest to `logoHash`.
+
+```javascript title="logo-hash.js"
+const bytes = new Uint8Array(await (await fetch(logoURL)).arrayBuffer());
+const digest = await crypto.subtle.digest("SHA-256", bytes);
+const hex = [...new Uint8Array(digest)]
+  .map((byte) => byte.toString(16).padStart(2, "0"))
+  .join("");
+
+if (hex !== provider.logoHash) {
+  throw new Error("Logo bytes do not match logoHash");
+}
+```
+
+In Node, `createHash("sha256").update(bytes).digest("hex")` from `node:crypto` returns the same hex string.
+
+### Check provider signatures
+
+The operator signature covers the signed listing fields, including `logoHash`. `signatures.json` is in the git tag, not in the npm package. Clone tag `v<version>` of [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets) and run the check there.
+
+```bash
+git clone --depth 1 --branch v<version> https://github.com/bifrostwallet/assets.git
+cd assets
+./yarn install
+./yarn verify:providers
+```
+
+`viem` is a dev dependency of that repository. The published package does not depend on it. Do not add `viem` to your app.
+
+Self-signatures are grandfathered until 31 December 2026. Until that date, run `./yarn verify:providers` without `--strict`. After that date, run `./yarn verify:providers --strict`.
+
+## Confirm npm provenance
+
+Trusted Publishing uses OIDC. On the npm version page, a green check means npm linked that publish to the source commit. See [Viewing package provenance](https://docs.npmjs.com/viewing-package-provenance/).
+
+```bash
+npm audit signatures
+```
+
+`npm audit signatures` checks the registry signatures of the packages in your install.
