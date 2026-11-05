@@ -85,25 +85,25 @@ If you uploaded `flare-providers.json`, fetch that URL. One request. Its `logoUR
 
 ## Do and do not
 
-**Do** pin with `--save-exact` / `--exact` and commit the lockfile.
+DO: pin with `--save-exact` / `--exact` and commit the lockfile.
 
-**Do not** depend on a `^` range that can slip in a newer catalog without a logo refresh.
+DO NOT: depend on a `^` range. A newer catalog can slip in without a logo refresh.
 
-**Do** at pin-bump, copy `providers/**/logo.webp` from the matching git tag (`v` + version) onto a host you control, keeping relative paths. Optionally generate one catalog JSON with `getListedProviders` or `getProviders` plus `resolveAssetURL`, and upload it next to the logos.
+DO: at each pin bump, copy `providers/**/logo.webp` from the tag `v` plus the version onto a host you control, and keep the relative paths. If you want one JSON file, generate it with `getListedProviders` or `getProviders` plus `resolveAssetURL`, and upload it next to the logos.
 
-**Do not** fetch `all.json`, or logos, from GitHub raw, from the assets repository, or from Bifrost’s CDN at runtime. Git `all.json` is not a public consume API.
+DO NOT: fetch `all.json`, or logos, from GitHub raw, from the assets repository, or from Bifrost’s CDN at runtime. `all.json` in git is not a public consume API.
 
-**Do** call `resolveAssetURL(logoURL, yourBase)` and serve icons from your host.
+DO: call `resolveAssetURL(logoURL, yourBase)` and serve icons from your host.
 
-**Do not** omit the base so the helper falls back to GitHub, or serve icons from `node_modules`.
+DO NOT: omit the base. That falls back to GitHub. Do not serve icons from `node_modules`.
 
-**Do** import listing helpers (`getListedProviders` / `getProvider`) for a picker. Import the separate signatures entry only if you will verify.
+DO: import `getListedProviders` and `getProvider` for a picker. Import `@bifrostwallet/assets/signatures` only if you will verify.
 
-**Do not** assume signatures are on each provider object in the main listing.
+DO NOT: assume signatures are fields on each provider from the main listing.
 
-**Do,** for high-security, verify logo hashes, and optionally operator signatures with `viem`, in CI at pin-bump.
+DO: in CI at pin-bump, compare logo bytes to `logoHash`. You can also recover the operator signature with `viem`.
 
-**Do not** require every frontend to install `viem` or to recover EIP-712 signatures in the browser. There is no catalog or manifest signature.
+DO NOT: require every frontend to install `viem`, or to recover EIP-712 signatures in the browser. There is no catalog signature to require.
 
 ## Upload examples
 
@@ -120,7 +120,7 @@ See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects).
 ```bash
 aws s3 sync data/providers s3://YOUR_BUCKET/assets/providers \
   --exclude "*" \
-  --include "*/logo.webp"
+  --include "*/*/logo.webp"
 ```
 
 See [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
