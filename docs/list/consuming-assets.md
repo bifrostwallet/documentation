@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Most consumers are dapps and frontends. Pin [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets), copy provider logos onto a host you control, and read listings from the package or from one JSON file on that same host. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
+Most consumers are dapps and frontends. Pin [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets), copy the logo trees you serve onto a host you control, and read listings from the package or from one JSON file on that same host. Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
 To list a provider, follow [FTSO provider](ftso-provider.md).
 
@@ -18,7 +18,14 @@ Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifro
 
 Do this the first time, and again every time you bump the pin, before you ship. The git tag is `v` plus the package version. Logo files are not in the npm package.
 
-From that tag, copy `providers/**/logo.webp` to your CDN or backend. Keep the relative paths. A `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`.
+From that tag, copy every logo tree you serve to your CDN or backend. Keep the relative paths.
+
+* `data/providers/**/logo.webp` (provider icons). A `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`
+* `data/tokens/**/logo.webp` (EVM and XRPL token icons)
+* `data/dapps/**/logo.webp` (dapp icons)
+* `data/contracts/**/logo.webp` (contract logos). A shared project logo is `data/contracts/projects/<slug>/logo.webp`. A contract may also keep its own `logo.webp` beside its JSON
+
+Published contract records include `project`, `projectName`, `logoURL`, and `logoHash`. Contracts are no longer linked to dapps. A published `logoURL` is `contracts/projects/<slug>/logo.webp`, or that contract’s own logo when the file beside its JSON is present.
 
 If you want one hosted JSON file, write it from the package in the same step and upload it next to the logos. Name the file whatever you want.
 
@@ -75,11 +82,11 @@ Chain ids are CAIP-2. `getProvider` matches `identityAddress` case-insensitively
 | Comparison lists and provider **picker** / discovery | `getListedProviders` (`listed: true` only) |
 | Confirmations and details | `getProvider`, including entries with `listed: false` |
 
-`logoURL` in the package is a relative path. Always pass your host to `resolveAssetURL(logoURL, base)`. When you pass a base, it only joins that path to your host. It does not fall back to GitHub or Bifrost’s CDN. The example base is the directory that contains `providers/`. GitHub and Bifrost’s CDN are not logo hosts.
+`logoURL` in the package is a relative path. Always pass your host to `resolveAssetURL(logoURL, base)`. When you pass a base, it only joins that path to your host. It does not fall back to GitHub or Bifrost’s CDN. The example base is the directory that contains `providers/`, `tokens/`, `dapps/`, and `contracts/`. GitHub and Bifrost’s CDN are not logo hosts.
 
 The GitHub raw fallback runs only when you omit the base or pass an empty base. Do not omit the base.
 
-`resolveAssetURL` works the same way for any listing’s `logoURL` (tokens and dapps included). Catalog logos are WebP.
+`resolveAssetURL` works the same way for any listing’s `logoURL` (token icons, dapp icons, and contract logos). Pass that listing’s `logoURL`, as the examples do with `provider.logoURL`. Catalog logos are WebP.
 
 If you uploaded `flare-providers.json`, fetch that URL. One request. Its `logoURL` values already point at your host.
 
@@ -89,7 +96,7 @@ DO: pin with `--save-exact` / `--exact` and commit the lockfile.
 
 DO NOT: depend on a `^` range. A newer catalog can slip in without a logo refresh.
 
-DO: at each pin bump, copy `providers/**/logo.webp` from the tag `v` plus the version onto a host you control, and keep the relative paths. If you want one JSON file, generate it with `getListedProviders` or `getProviders` plus `resolveAssetURL`, and upload it next to the logos.
+DO: at each pin bump, copy every logo tree you serve from the tag `v` plus the version onto a host you control, and keep the relative paths. Provider icons are `data/providers/**/logo.webp`. Token icons are `data/tokens/**/logo.webp`. Dapp icons are `data/dapps/**/logo.webp`. Contract logos are `data/contracts/**/logo.webp`. If you want one JSON file, generate it with `getListedProviders` or `getProviders` plus `resolveAssetURL`, and upload it next to the logos.
 
 DO NOT: fetch `all.json`, or logos, from GitHub raw, from the assets repository, or from Bifrost’s CDN at runtime. `all.json` in git is not a public consume API.
 
@@ -113,19 +120,47 @@ From a checkout of tag `v<version>`:
 gcloud storage rsync data/providers gs://YOUR_BUCKET/assets/providers \
   --recursive \
   --exclude=".*\.json$"
+gcloud storage rsync data/tokens gs://YOUR_BUCKET/assets/tokens \
+  --recursive \
+  --exclude=".*\.json$"
+gcloud storage rsync data/dapps gs://YOUR_BUCKET/assets/dapps \
+  --recursive \
+  --exclude=".*\.json$"
+gcloud storage rsync data/contracts gs://YOUR_BUCKET/assets/contracts \
+  --recursive \
+  --exclude=".*\.json$"
 ```
 
 See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects).
 
 ```bash
+# Providers: chain/identity/logo.webp
 aws s3 sync data/providers s3://YOUR_BUCKET/assets/providers \
+  --exclude "*" \
+  --include "*/*/logo.webp"
+
+# EVM tokens: chain/address/logo.webp and chain/native/logo.webp.
+# XRPL issued tokens: xrpl-0/issuer/currency/logo.webp.
+aws s3 sync data/tokens s3://YOUR_BUCKET/assets/tokens \
+  --exclude "*" \
+  --include "*/*/logo.webp" \
+  --include "*/*/*/logo.webp"
+
+# Dapp icons: slug/logo.webp
+aws s3 sync data/dapps s3://YOUR_BUCKET/assets/dapps \
+  --exclude "*" \
+  --include "*/logo.webp"
+
+# Contract projects: projects/<slug>/logo.webp
+# Per-contract logos: <chain>/<address>/logo.webp beside the contract JSON
+aws s3 sync data/contracts s3://YOUR_BUCKET/assets/contracts \
   --exclude "*" \
   --include "*/*/logo.webp"
 ```
 
 See [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
-Run the same copy on every pin bump. Object keys stay `providers/<chain>/<identity>/logo.webp` under the base you pass to `resolveAssetURL`.
+Run the same copy on every pin bump. Object keys stay under the base you pass to `resolveAssetURL` (`providers/…`, `tokens/…`, `dapps/…`, `contracts/…`). Dapp icons are only `dapps/<slug>/logo.webp`. Contract logos are `contracts/projects/<slug>/logo.webp`, or `contracts/<chain>/<address>/logo.webp` when that contract has its own `logo.webp`.
 
 ## Optional checks
 
@@ -168,7 +203,7 @@ import { getProviderSignatures } from "@bifrostwallet/assets/signatures";
 const record = getProviderSignatures("eip155:14", provider.identityAddress);
 ```
 
-`getProviderSignatures` returns `null` when this version has no signature file for that identity. Some listings stay unsigned until 31 December 2026.
+`getProviderSignatures` returns `null` when this version has no signature file for that identity. Some listings stay unsigned until 31 December 2026. That date is preliminary, not a fixed deadline.
 
 Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`. [`viem`](https://viem.sh) `recoverTypedDataAddress` does that recovery. `record.verificationInstructions` states the domain and the field order. Do this in CI or on a backend. A picker should not recover signatures in the browser.
 

@@ -6,6 +6,10 @@ One listing covers your **provider identity** and nested **validator NodeIDs**. 
 
 **List:** [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider)
 
+:::info
+These listing requirements are a draft and open for discussion. We want feedback from as many providers as possible before the guidelines are fixed for 2027. Feedback is welcome.
+:::
+
 ## Prerequisites
 
 * A registered FTSO entity on Flare (`eip155:14`) or Songbird (`eip155:19`)
@@ -53,7 +57,7 @@ Each provider lives under `data/providers/<eip155-14|eip155-19>/<identityAddress
 
 Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON is your listing text, `identityAddress`, `acknowledgedResponsibilities`, and `logoHash`. It excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, `firstTransaction`, and the chain snapshot (`delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators`).
 
-The signature requirement is a **self-signature** by your identity address. Entries that predate the repository's public launch are grandfathered until at least **31 December 2026**. After that date (to be finally determined together with the existing providers), listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted from Bifrost Wallet, and relisted when the requirements are met.
+The signature requirement is a **self-signature** by your identity address. Entries that predate the repository's public launch are grandfathered until at least **31 December 2026**. That date is preliminary, not a fixed deadline. After a date finally determined together with the existing providers, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted from Bifrost Wallet, and relisted when the requirements are met.
 
 ### Domain linkage (optional, recommended)
 
@@ -86,7 +90,7 @@ The unsigned `domainLinked` flag is refreshed nightly; you can pre-check with to
 
 Accepted submissions enter the **catalog** with name, logo, and metadata. That data is available for confirmations, deep links, and apps that already know the provider.
 
-`listed: true` is curator-granted and is what Bifrost Wallet uses for **picker / discovery** UIs. Requirements include:
+`listed: true` is curator-granted and is what Bifrost Wallet uses for **picker / discovery** UIs. The listing criteria apply to new providers only. Any provider that has participated on Songbird and/or Flare and is currently listed (`listed: true`) is grandfathered. Requirements include:
 
 * Private outreach on file (sealed via the listing portal)
 * `domainLinked: true`
@@ -102,7 +106,7 @@ Curator bar for new providers to receive `listed: true` is still to be determine
 | **Flare** | Self-bond ≥ **9M FLR**; ≥ **1** validator; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **90M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
 | **Songbird** | WSGB vote power ≥ **25M** |
 
-**Grandfathering:** providers listed before the repository went public keep `listed: true` until at least **31 December 2026** without completing domain linkage or ownership signatures. After that date (date to be finalized together with the existing provider community), listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted, and relisted when the requirements are met.
+**Grandfathering:** the listing criteria apply to new providers only. Any provider that has participated on Songbird and/or Flare and is currently listed (`listed: true`) is grandfathered. **31 December 2026** is a preliminary date for the self-signed listing requirement, not a fixed deadline. Providers listed before the repository went public keep `listed: true` until at least that preliminary date without completing domain linkage or ownership signatures. After a date finally determined together with the existing provider community, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted, and relisted when the requirements are met.
 
 ### Guidance for apps that consume provider data
 
