@@ -22,48 +22,42 @@ Upload `data/providers` from the git tag that matches the pinned version. The ta
 
 Host the files yourself, for example on Cloud Storage or S3, and upload them from CI. Keep the relative paths. `base` is the URL of the directory that contains `providers/`, for example `https://cdn.example.com/assets/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
-`logoURL` in the package is a relative path. `resolveAssetURL(logoURL, base)` joins it to your host. The [frontend](#frontend) and [backend](#backend) examples pass that `base`. The same pattern works for tokens.
+Import the package and call it the same way in a browser, a dapp, or on a server. `logoURL` in the package is a relative path. `resolveAssetURL(logoURL, base)` joins it to your host. Chain ids are CAIP-2. Call these once per chain (`eip155:14` for Flare, `eip155:19` for Songbird). The same pattern works for tokens.
 
-### Frontend {#frontend}
+### Get all listed providers
 
-Import the package in the app so the catalog is in the bundle. Call `resolveAssetURL(provider.logoURL, base)` in the browser. `getListedProviders` is the picker (`listed: true` only). `getProviders` includes the rest, and `getProvider(chainId, identityAddress)` returns one provider or `null`. Chain ids are CAIP-2. The address match is case-insensitive.
-
-```tsx title="FlareProviderList.tsx"
-import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
-
-const base = "https://cdn.example.com/assets/";
-
-export function FlareProviderList() {
-  return (
-    <ul>
-      {getListedProviders("eip155:14").map((provider) => (
-        <li key={provider.identityAddress}>
-          <img alt="" src={resolveAssetURL(provider.logoURL, base)} />
-          {provider.name}
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-### Backend {#backend}
-
-Read the package on the server, resolve URLs with your `base`, and serve JSON. The frontend fetches that file and does not install the package.
+`getListedProviders(chainId)` returns providers with `listed: true`.
 
 ```js
-import { writeFileSync } from "node:fs";
 import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
 
 const base = "https://cdn.example.com/assets/";
+
 const listed = getListedProviders("eip155:14").map((provider) => ({
   ...provider,
   logoURL: resolveAssetURL(provider.logoURL, base),
 }));
-writeFileSync("flare-providers.json", JSON.stringify(listed));
 ```
 
-Use `getProviders("eip155:14")` when the file should include providers that are not listed.
+### Get all listed validators
+
+The package does not export a validator list. Each provider has `validators`, an array of NodeID strings. Listed validators are that field on the providers from `getListedProviders`.
+
+```js
+import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
+
+const base = "https://cdn.example.com/assets/";
+
+const listedValidators = getListedProviders("eip155:14").flatMap((provider) =>
+  provider.validators.map((nodeId) => ({
+    nodeId,
+    name: provider.name,
+    logoURL: resolveAssetURL(provider.logoURL, base),
+  })),
+);
+```
+
+`findProviderByValidator(chainId, nodeId)` returns the provider for one NodeID, or `null`. It searches every provider on the chain. The NodeID must match the catalog, including the `NodeID-` prefix.
 
 ### Optional checks
 
@@ -112,17 +106,26 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 ## 3. GitHub (backwards compatible) {#github-backwards-compatible}
 
-Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute.
+Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon.
 
-1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`. The directory name uses a hyphen (`eip155-14`).
-2. Use each record’s `logoURL` as the image address.
+1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`.
+2. Listed providers are the records with `listed: true`. Use each record’s `logoURL` as the image address.
+3. Listed validators are the `validators` arrays on those records. Each entry is a NodeID string.
 
 ```js
 const providers = await fetch(
   "https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/eip155-14/all.json",
 ).then((res) => res.json());
 
-const logoURL = providers[0].logoURL;
+const listed = providers.filter((provider) => provider.listed);
+
+const listedValidators = listed.flatMap((provider) =>
+  provider.validators.map((nodeId) => ({
+    nodeId,
+    name: provider.name,
+    logoURL: provider.logoURL,
+  })),
+);
 ```
 
 ## Provenance
