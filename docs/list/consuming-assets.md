@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting provider logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/providers` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) covers the package with no `base`, or `all.json` on `main`.
+Self-hosting provider logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/providers` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads `data/providers/<chain>/all.json` from GitHub raw on `main`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
 
@@ -112,22 +112,10 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 ## 3. GitHub (backwards compatible) {#github-backwards-compatible}
 
-Use this when you are not hosting the logo files.
+Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute.
 
-Call `resolveAssetURL(provider.logoURL)` with no `base`. Logos load from GitHub at the tag that matches the installed version (`v` plus that version).
-
-```tsx title="FlareProviderList.tsx"
-import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
-
-const providers = getListedProviders("eip155:14").map((provider) => ({
-  ...provider,
-  logoURL: resolveAssetURL(provider.logoURL),
-}));
-```
-
-The same omitted `base` works in the backend example above.
-
-Without the package, fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`. The directory name uses a hyphen (`eip155-14`). These files track `main`. Each `logoURL` is already absolute, so render it as it is.
+1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`. The directory name uses a hyphen (`eip155-14`).
+2. Use each record’s `logoURL` as the image address.
 
 ```js
 const providers = await fetch(
