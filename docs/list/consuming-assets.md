@@ -107,6 +107,14 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 Not recommended. Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon. There is no token `all.json`.
 
+Compared with the package and self-hosted logos:
+
+- No version pin. It reads `main`, so changes arrive unannounced and can break you.
+- `raw.githubusercontent.com` is rate-limited and has no uptime guarantee for hotlinking.
+- Providers and validators only. `all.json` has no tokens, contracts, dapps, or dapp categories.
+- No TypeScript types or helpers for lookups, listed filters, or validator-to-provider.
+- No signature or verification checks from the package. Your users’ requests go to GitHub.
+
 1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`.
 2. Listed providers are the records with `listed: true`. Use each record’s `logoURL` as the image address.
 3. Listed validators are the `validators` arrays on those records. Each entry is a NodeID string.
