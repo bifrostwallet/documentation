@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL of that upload as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
+Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL where you uploaded `data/` as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub raw all.json (Legacy)](#github-raw-alljson-legacy) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
@@ -8,19 +8,21 @@ To list a provider, follow [FTSO provider](ftso-provider.md).
 
 ## 1. Pin the package
 
-```bash
+Pin one version and commit the lockfile.
+
+```sh
 npm install @bifrostwallet/assets@<version> --save-exact
 ```
 
-Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifrostwallet/assets@<version> --save-exact`.
+```sh
+yarn add @bifrostwallet/assets@<version> --exact
+```
 
-An exact pin keeps a newer catalog from arriving unnoticed. Commit the lockfile.
-
-## 2. Self-hosting
+## 2. Self-hosting (Recommended)
 
 Logo files are not in the npm package. Upload all of `data/` (providers, tokens, dapps, contracts) from the git tag that matches the pinned version. The tag is `v` plus the package version. Do this from CI the first time, and again every time you bump the pin, before you ship.
 
-Host the files yourself, for example on Cloud Storage or S3. Keep the relative paths. `baseURL` is the public URL of your bucket, or of the CDN in front of it, where you uploaded `data/`, for example `https://assets.example.com/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+Host the files yourself, for example on Cloud Storage or S3. Keep the relative paths. `baseURL` is the public URL where you uploaded `data/`, for example `https://assets.example.com/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
 Import `createAssets` and call it the same way in a browser, a dapp, or on a server. `logoURL` in the package is a relative path. `createAssets({ baseURL })` joins it to that public URL, so each returned `logoURL` is absolute. `baseURL` must start with `https://`. A trailing slash is optional. Chain ids are CAIP-2. Call these once per chain (`eip155:14` for Flare, `eip155:19` for Songbird). An unknown chain id throws. A missing record is `null`.
 
@@ -101,9 +103,17 @@ const record = getProviderSignatures("eip155:14", provider.identityAddress);
 
 Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`. [`viem`](https://viem.sh) `recoverTypedDataAddress` does that recovery. `record.verificationInstructions` states the domain and the field order. Do this in CI or on a backend. A picker should not recover signatures in the browser.
 
-## 3. GitHub (backwards compatible) {#github-backwards-compatible}
+## 3. GitHub raw all.json (Legacy) {#github-raw-alljson-legacy}
 
 Not recommended. Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon. There is no token `all.json`.
+
+Compared with the package and self-hosted logos:
+
+- No version pin. It reads `main`, so changes arrive unannounced and can break you.
+- `raw.githubusercontent.com` is rate-limited and has no uptime guarantee for hotlinking.
+- Providers and validators only. `all.json` has no tokens, contracts, dapps, or dapp categories.
+- No TypeScript types or helpers for lookups, listed filters, or validator-to-provider.
+- No signature or verification checks from the package. Your users’ requests go to GitHub.
 
 1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`.
 2. Listed providers are the records with `listed: true`. Use each record’s `logoURL` as the image address.
