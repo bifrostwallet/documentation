@@ -1,8 +1,8 @@
 # Consuming Assets
 
-Self-hosting provider logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/providers` from the matching git tag, pass that host as `base`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads `data/providers/<chain>/all.json` from GitHub raw on `main`.
+Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL of that upload as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
 
-Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [`CONSUMERS.md`](https://github.com/bifrostwallet/assets/blob/main/CONSUMERS.md).
+Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
 To list a provider, follow [FTSO provider](ftso-provider.md).
 
@@ -16,44 +16,45 @@ Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifro
 
 An exact pin keeps a newer catalog from arriving unnoticed. Commit the lockfile.
 
-## 2. Self-hosted logos
+## 2. Self-hosting
 
-Upload `data/providers` from the git tag that matches the pinned version. The tag is `v` plus the package version. Logo files are not in the npm package. Do this the first time, and again every time you bump the pin, before you ship.
+Logo files are not in the npm package. Upload all of `data/` (providers, tokens, dapps, contracts) from the git tag that matches the pinned version. The tag is `v` plus the package version. Do this from CI the first time, and again every time you bump the pin, before you ship.
 
-Host the files yourself, for example on Cloud Storage or S3, and upload them from CI. Keep the relative paths. `base` is the URL of the directory that contains `providers/`, for example `https://cdn.example.com/assets/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+Host the files yourself, for example on Cloud Storage or S3. Keep the relative paths. `baseURL` is the public URL of your bucket, or of the CDN in front of it, where you uploaded `data/`, for example `https://assets.example.com/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
-Import the package and call it the same way in a browser, a dapp, or on a server. `logoURL` in the package is a relative path. `resolveAssetURL(logoURL, base)` joins it to your host. Chain ids are CAIP-2. Call these once per chain (`eip155:14` for Flare, `eip155:19` for Songbird). The same pattern works for tokens.
+Import `createAssets` and call it the same way in a browser, a dapp, or on a server. `logoURL` in the package is a relative path. `createAssets({ baseURL })` joins it to that public URL, so each returned `logoURL` is absolute. `baseURL` must start with `https://`. A trailing slash is optional. Chain ids are CAIP-2. Call these once per chain (`eip155:14` for Flare, `eip155:19` for Songbird). An unknown chain id throws. A missing record is `null`.
+
+The same object reads tokens with `getTokens`, `getToken`, `getNativeToken`, and `getXrplToken`, contracts with `getContracts` and `getContract`, and browser chips with `getDappCategories`. The examples below stay on listed FTSO providers and validators.
 
 ### Get all listed providers
 
-`getListedProviders(chainId)` returns providers with `listed: true`.
+`assets.getListedProviders(chainId)` returns providers with `listed: true`. `assets.getProviders(chainId)` returns every provider on that chain. `assets.getProvider(chainId, identityAddress)` returns one provider, or `null`. The address match ignores case.
 
 ```js
-import { getListedProviders, resolveAssetURL } from "@bifrostwallet/assets";
+import { createAssets } from "@bifrostwallet/assets";
 
-const base = "https://cdn.example.com/assets/";
+const assets = createAssets({ baseURL: "https://assets.example.com/" });
 
-const listed = getListedProviders("eip155:14").map((provider) => ({
-  ...provider,
-  logoURL: resolveAssetURL(provider.logoURL, base),
-}));
+const listed = assets.getListedProviders("eip155:14");
 ```
 
 ### Get all listed validators
 
-`getListedValidators(chainId)` returns the validators of providers with `listed: true`. Each entry has the validator NodeID and the owning provider’s identity address and name. A provider’s validators stay together, in `getProviders` order. `getValidators(chainId)` is the same list for every provider. `getValidatorsByIdentity(chainId, identityAddress)` matches the address without regard to case and returns `[]` when that provider has none.
+`assets.getListedValidators(chainId)` returns the validators of providers with `listed: true`. Each entry has the validator NodeID and the owning provider’s identity address and name. A provider’s validators stay together, in `getProviders` order. `assets.getValidators(chainId)` is the same list for every provider. `assets.getValidatorsByIdentity(chainId, identityAddress)` matches the address without regard to case and returns `[]` when that provider has none.
 
 ```js
-import { getListedValidators, getValidatorsByIdentity } from "@bifrostwallet/assets";
+import { createAssets } from "@bifrostwallet/assets";
 
-const listedValidators = getListedValidators("eip155:14");
-const bifrostValidators = getValidatorsByIdentity(
+const assets = createAssets({ baseURL: "https://assets.example.com/" });
+
+const listedValidators = assets.getListedValidators("eip155:14");
+const bifrostValidators = assets.getValidatorsByIdentity(
   "eip155:14",
   "0x1650d2760baee638c034200dedcbe17b050d0364",
 );
 ```
 
-`findProviderByValidator(chainId, nodeId)` returns the provider for one NodeID, or `null`.
+`assets.findProviderByValidator(chainId, nodeId)` returns the provider for one NodeID, or `null`. The NodeID includes the `NodeID-` prefix.
 
 ### Optional checks
 
@@ -102,7 +103,7 @@ Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`
 
 ## 3. GitHub (backwards compatible) {#github-backwards-compatible}
 
-Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon.
+Not recommended. Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon. There is no token `all.json`.
 
 1. Fetch `https://raw.githubusercontent.com/bifrostwallet/assets/main/data/providers/<chain>/all.json`.
 2. Listed providers are the records with `listed: true`. Use each record’s `logoURL` as the image address.
