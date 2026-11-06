@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL where you uploaded `data/` as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
+Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL where you uploaded `data/` as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub raw all.json (Legacy)](#github-raw-alljson-legacy) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
@@ -18,7 +18,7 @@ npm install @bifrostwallet/assets@<version> --save-exact
 yarn add @bifrostwallet/assets@<version> --exact
 ```
 
-## 2. Self-hosting
+## 2. Self-hosting (Recommended)
 
 Logo files are not in the npm package. Upload all of `data/` (providers, tokens, dapps, contracts) from the git tag that matches the pinned version. The tag is `v` plus the package version. Do this from CI the first time, and again every time you bump the pin, before you ship.
 
@@ -103,7 +103,7 @@ const record = getProviderSignatures("eip155:14", provider.identityAddress);
 
 Recover the EIP-712 `ProviderListing` signer and compare it to `identityAddress`. [`viem`](https://viem.sh) `recoverTypedDataAddress` does that recovery. `record.verificationInstructions` states the domain and the field order. Do this in CI or on a backend. A picker should not recover signatures in the browser.
 
-## 3. GitHub (backwards compatible) {#github-backwards-compatible}
+## 3. GitHub raw all.json (Legacy) {#github-raw-alljson-legacy}
 
 Not recommended. Read provider listings from GitHub raw. These files track `main`. Each `logoURL` is already absolute. The directory name uses a hyphen (`eip155-14`), not a CAIP-2 colon. There is no token `all.json`.
 
