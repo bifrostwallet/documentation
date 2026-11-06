@@ -36,7 +36,7 @@ Entries live under `data/dapps/<slug>/` where `slug` is derived from the hostnam
 }
 ```
 
-`logoURL` is stored as a relative path and resolved by consumers against their asset base URL. Category chips live in `data/dapps/categories.json`.
+`logoURL` is stored as a relative path. Consumers pass `baseURL` to `createAssets`: the public URL of your bucket, or of the CDN in front of it, where you uploaded `data/` (for example `https://assets.example.com/`). Category chips live in `data/dapps/categories.json`. See [Consuming Assets](consuming-assets.md).
 
 ## How to request a listing
 
