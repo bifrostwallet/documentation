@@ -1,6 +1,6 @@
 # Consuming Assets
 
-Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL of that upload as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
+Self-hosting logos is the standard way to use [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). Upload `data/` from the matching git tag, pass the public URL where you uploaded `data/` as `baseURL` to `createAssets`, and use the optional checks when you want to verify what you serve. [GitHub (backwards compatible)](#github-backwards-compatible) reads provider listings from GitHub raw on `main`. That path is not recommended. There is no token `all.json`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
@@ -8,19 +8,21 @@ To list a provider, follow [FTSO provider](ftso-provider.md).
 
 ## 1. Pin the package
 
-```bash
+Pin one version and commit the lockfile.
+
+```sh
 npm install @bifrostwallet/assets@<version> --save-exact
 ```
 
-Yarn: `yarn add @bifrostwallet/assets@<version> --exact`. pnpm: `pnpm add @bifrostwallet/assets@<version> --save-exact`.
-
-An exact pin keeps a newer catalog from arriving unnoticed. Commit the lockfile.
+```sh
+yarn add @bifrostwallet/assets@<version> --exact
+```
 
 ## 2. Self-hosting
 
 Logo files are not in the npm package. Upload all of `data/` (providers, tokens, dapps, contracts) from the git tag that matches the pinned version. The tag is `v` plus the package version. Do this from CI the first time, and again every time you bump the pin, before you ship.
 
-Host the files yourself, for example on Cloud Storage or S3. Keep the relative paths. `baseURL` is the public URL of your bucket, or of the CDN in front of it, where you uploaded `data/`, for example `https://assets.example.com/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
+Host the files yourself, for example on Cloud Storage or S3. Keep the relative paths. `baseURL` is the public URL where you uploaded `data/`, for example `https://assets.example.com/`. A package `logoURL` looks like `providers/eip155-14/<identity>/logo.webp`. See [Upload objects](https://cloud.google.com/storage/docs/uploading-objects) and [`aws s3 sync`](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html).
 
 Import `createAssets` and call it the same way in a browser, a dapp, or on a server. `logoURL` in the package is a relative path. `createAssets({ baseURL })` joins it to that public URL, so each returned `logoURL` is absolute. `baseURL` must start with `https://`. A trailing slash is optional. Chain ids are CAIP-2. Call these once per chain (`eip155:14` for Flare, `eip155:19` for Songbird). An unknown chain id throws. A missing record is `null`.
 
