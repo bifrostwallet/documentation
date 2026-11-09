@@ -7,7 +7,8 @@ Bifrost Wallet curates off-chain metadata (logos, names, links) for assets that 
 | Type | Form | Status |
 | --- | --- | --- |
 | [FTSO provider](ftso-provider.md) | [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider) | Self-serve |
-| [Dapp](dapp.md) | [bifrostwallet.com/list/dapp](https://bifrostwallet.com/list/dapp) | Curated (self-serve expanding) |
+
+Dapps are curated by the Bifrost team. Self-serve listing is only for FTSO providers.
 
 Start at [bifrostwallet.com/list](https://bifrostwallet.com/list/) for the listing hub. Additional asset types may be documented here as the assets repository grows. There are **no paid listing fees** for the flows covered in these docs.
 

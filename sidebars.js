@@ -35,7 +35,7 @@ const sidebars = {
       label: "List",
       link: { type: "doc", id: "list/index" },
       collapsed: false,
-      items: ["list/ftso-provider", "list/dapp", "list/consuming-assets"],
+      items: ["list/ftso-provider", "list/consuming-assets"],
     },
   ],
 };

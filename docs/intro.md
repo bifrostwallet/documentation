@@ -10,7 +10,7 @@ title: Quickstart
 Bifrost Wallet is a self-custody multi-chain wallet with an in-app dapp browser and a [WalletConnect certified](integrate/walletconnect/) integration. These docs cover two jobs:
 
 1. **Integrate**: connect your dapp to Bifrost ([WalletConnect](integrate/walletconnect/) preferred; [Web3 injection](integrate/web3-injection/) in the in-app browser)
-2. **List**: add an FTSO provider or dapp to Bifrost’s curated assets
+2. **List**: add an FTSO provider to Bifrost’s curated assets
 
 ## Integrate a dapp
 
@@ -28,6 +28,5 @@ Curated logos and metadata live in [`bifrostwallet/assets`](https://github.com/b
 | Type | Form |
 | --- | --- |
 | [FTSO provider](list/ftso-provider.md) | [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider) |
-| [Dapp](list/dapp.md) | [bifrostwallet.com/list/dapp](https://bifrostwallet.com/list/dapp) |
 
-See [List overview](list/) for how submissions work and [Consuming Assets](list/consuming-assets.md) if you want to use the published data in your own software.
+Dapps are curated by the Bifrost team. See [List overview](list/) for how provider submissions work and [Consuming Assets](list/consuming-assets.md) if you want to use the published data in your own software.
