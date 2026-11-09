@@ -17,4 +17,4 @@ Injected dapp browser support applies to EVM chains Bifrost ships with `dApp` su
 
 ## Not available via injection
 
-Bitcoin, Litecoin, Dogecoin, and XRP Ledger have no injected provider. Use [WalletConnect](../walletconnect/).
+Bitcoin, Litecoin, Dogecoin, and XRP Ledger have no injected provider. Use [WalletConnect](../walletconnect/index.md).

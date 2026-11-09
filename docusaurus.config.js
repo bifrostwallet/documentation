@@ -7,6 +7,8 @@ const config = {
 
   url: "https://docs.bifrostwallet.com",
   baseUrl: "/",
+  // Match the GCS bucket: path/ is 200, and the slashless path 301s to path/index.html.
+  trailingSlash: true,
 
   // Inline JS/CSS: incompatible with a strict CSP on the LB/backend bucket.
   baseUrlIssueBanner: false,

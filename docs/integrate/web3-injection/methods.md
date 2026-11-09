@@ -58,7 +58,7 @@ These methods are rejected by Bifrost:
 | `eth_decrypt` | Not implemented |
 | `eth_getEncryptionPublicKey` | Not implemented |
 
-Also not available on the injected provider (use [WalletConnect](../walletconnect/) instead):
+Also not available on the injected provider (use [WalletConnect](../walletconnect/index.md) instead):
 
 * `xrpl_signTransaction`
 * UTXO methods: `sendTransfer`, `getAccountAddresses`, `signPsbt`, `signMessage`
