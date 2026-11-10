@@ -1,6 +1,6 @@
 # List
 
-Bifrost Wallet curates off-chain metadata (logos, names, links) for assets that appear in the wallet. The source of truth is [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Published data is available as an NPM package; see [Consuming Assets](consuming-assets.md).
+Bifrost Wallet curates off-chain metadata (logos, names, links) for assets that appear in the wallet. The source of truth is [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Published data is available as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets), which includes dapps (curated, not self-serve). See [Consuming Assets](consuming-assets.md).
 
 ## What you can list
 
