@@ -29,4 +29,4 @@ Curated logos and metadata live in [`bifrostwallet/assets`](https://github.com/b
 | --- | --- |
 | [FTSO provider](list/ftso-provider.md) | [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider) |
 
-Dapps are curated by the Bifrost team. See [List overview](list/) for how provider submissions work and [Consuming Assets](list/consuming-assets.md) if you want to use the published data in your own software.
+The published package includes dapps, which are curated by the Bifrost team, not self-serve. Self-serve listing is only for FTSO providers. See [List overview](list/) for how provider submissions work and [Consuming Assets](list/consuming-assets.md) if you want to use the published data in your own software.
