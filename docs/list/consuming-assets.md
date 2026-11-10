@@ -1,6 +1,6 @@
 # Consuming Assets
 
-[`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) is the curated catalog of FTSO providers, validators, tokens, contracts, and dapps for Bifrost Wallet. Dapps are a catalog like tokens, providers, and contracts. Tokens, contracts, and dapps are curated by the Bifrost team.
+[`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) is the curated catalog of FTSO providers, validators, tokens, contracts, and dapps for Bifrost Wallet. Tokens, contracts, and dapps are curated by the Bifrost team.
 
 The default is an exact version pin, then `const assets = createAssets()`. `baseURL` is optional. Omit it and logo URLs use jsDelivr pinned to that exact package version. Use `logoURL` directly, for example `{provider && <img src={provider.logoURL} alt="" />}`.
 
@@ -48,7 +48,7 @@ const provider = assets.getProvider(
 {provider && <img src={provider.logoURL} alt="" />}
 ```
 
-Pass `baseURL` when you host the files yourself. A trailing slash is optional. The examples further down do that. Self-hosting is optional.
+Pass `baseURL` when you host the files yourself. The examples further down do that.
 
 ## Accessors
 
@@ -147,7 +147,7 @@ const [entry] = getProviderListingVerification(
 await verifyTypedData(entry); // true
 ```
 
-`getProviderSignatures(chainId, identityAddress)`, also from `@bifrostwallet/assets/signatures`, returns that identity's signature record, or `null` when this version has none. An unknown chain throws.
+`getProviderSignatures(chainId, identityAddress)`, also from `@bifrostwallet/assets/signatures`, returns that identity's signature record, or `null` when this version has none.
 
 `EIP712_DOMAIN_SALT`, `PROVIDER_LISTING_TYPES`, `PROVIDER_LISTING_PRIMARY_TYPE`, and `providerListingTypedData({ message, chain })` are exported from `@bifrostwallet/assets` for anyone building the typed data themselves.
 
@@ -157,7 +157,7 @@ Fetch provider `all.json` from jsDelivr on `@main` when you are not installing t
 
 `@main` is the moving catalog, not a release tag. Provider `all.json` logo URLs in this repository use that unpinned branch. Updates there can take up to 12 hours to appear because jsDelivr caches branch URLs for up to 12 hours ([Caching](https://www.jsdelivr.com/documentation#id-caching)). The npm package pins `@<version>` (`@1.0.0` for this release) so its logos match the installed snapshot.
 
-Don't load lists or logos from `raw.githubusercontent.com`. GitHub's raw file host is not a CDN: it rate-limits requests per IP and returns HTTP 429 under load. jsDelivr is built for this traffic.
+Use the jsDelivr URL above instead of raw GitHub.
 
 Compared with the package and logos you host:
 
