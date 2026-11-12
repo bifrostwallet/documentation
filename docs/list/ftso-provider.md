@@ -1,12 +1,12 @@
-# FTSO Provider
+# Data provider
 
-List your FTSO data provider (and its validators) so Bifrost Wallet and other apps can show your logo, description, and entity metadata on Flare and Songbird.
+List your data provider (and its validators) so Bifrost Wallet and other apps can show your logo, description, and entity metadata on Flare and Songbird.
 
-One listing covers your **provider identity** and nested **validator NodeIDs**. Validators are not a separate listing type.
+One listing covers your **provider identity** and nested **validator NodeIDs**.
 
 **List:** [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider)
 
-The [ftso-signal-providers](https://github.com/TowoLabs/ftso-signal-providers) repository is archived. Provider listings now live in the curated assets catalog published as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets).
+The [`ftso-signal-providers`](https://github.com/TowoLabs/ftso-signal-providers) repository is archived. Provider listings now live in the curated assets catalog published as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets).
 
 :::info
 These listing requirements are a draft and open for discussion. We want feedback from as many providers as possible before the guidelines are fixed for 2027. Feedback is welcome.
@@ -51,19 +51,19 @@ Each provider lives under `data/providers/<chain>/<identityAddress>/` with `info
 | `logoHash` | yes | SHA-256 of `logo.webp` |
 | `delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators` | no | On-chain snapshot, including validator NodeIDs. A nightly job may update these without a new signature |
 | `logoURL` | no | Relative hosting path |
-| `listed` | no | Granted by curators. A nightly job (assets `src/earn/delist.ts`) opens a pull request setting `listed: false` when `eligibleForReward` is false in fsp-rewards `passes.json`, which curators merge. The same nightly job also proposes `listed: false` when the FTSO/FSP delegation fee or any current Flare P-chain validator fee is above 50%. Exactly 50% stays listed, and Songbird has only the FTSO/FSP fee |
+| `listed` | no | Granted by curators. Curators review listings and may delist a provider. They look at whether the provider is earning rewards (reward eligibility), whether its delegation fee and validator fees are reasonable for delegators, whether it is active and performing, and whether its listing information is accurate and up to date |
 | `managementGroup` | no | Synced from that network’s PollingManagementGroup. Flare and Songbird each have their own group |
-| `domainLinked` | no | Refreshed nightly from your website’s [domain linkage](#domain-linkage-optional-recommended) proof |
-| `dualNetwork` | no | Curator-maintained: same brand present on both Flare and Songbird in the catalog |
-| `firstTransaction` | no | Earliest known on-chain activity |
+| `domainLinked` | no | Refreshed nightly from your website’s [domain linkage](#domain-linkage) proof |
+| `dualNetwork` | no | Same brand present on both Flare and Songbird in the catalog |
+| `firstTransaction` | no | Earliest known on-chain activity. It can be used to compare how long providers have been around, for example to tell long-standing providers from newcomers |
 
 Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON is your listing text, `identityAddress`, `acknowledgedResponsibilities`, and `logoHash`. It excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, `firstTransaction`, and the chain snapshot (`delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators`).
 
 The signature requirement is a **self-signature** by your identity address. Some listings stay unsigned until 31 December 2026 (date to be confirmed with the provider community). After a date finally determined together with the existing providers, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted from Bifrost Wallet, and relisted when the requirements are met.
 
-### Domain linkage (optional, recommended)
+### Domain linkage
 
-Prove that your listing website is controlled by the same entity as the FTSO **identity address**. Publish a CAIP-2 prefixed record (`eip155:<chainId>:<identityAddress>`) using either or both methods below:
+Domain linkage is required to be listed. Prove that your listing website is controlled by the same entity as the **identity address**. Publish a CAIP-2 prefixed record (`eip155:<chainId>:<identityAddress>`) using either or both methods below:
 
 * **File:** `https://your-site/.well-known/providers.txt` (records separated by commas)
 * **DNS TXT:** name `_providers.<your-host>` (value is the same record payload)
@@ -105,8 +105,8 @@ Curator bar for new providers to receive `listed: true` is still to be determine
 
 | Network | Guideline |
 | --- | --- |
-| **Flare** | Self-bond ≥ **9M FLR**; ≥ **1** validator; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **90M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
-| **Songbird** | WSGB vote power ≥ **25M** |
+| **Flare** | Self-bond ≥ **9M FLR**; ≥ **2** validators; ≥ **20** unique P-chain stakers **and** ≥ **2M FLR** external stake; WFLR vote power ≥ **90M FLR**; prefer brands that already have a Songbird (canary) catalog entry |
+| **Songbird** | WSGB vote power ≥ **40M** |
 
 **Grandfathering:** Providers active on Songbird or Flare, earning rewards and listed today are grandfathered; listing criteria apply only to new providers. Some listings stay unsigned until 31 December 2026 (date to be confirmed with the provider community). Providers listed before the repository went public keep `listed: true` until that date without completing domain linkage or ownership signatures. After a date finally determined together with the existing provider community, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted, and relisted when the requirements are met.
 
