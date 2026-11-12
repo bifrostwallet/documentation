@@ -1,14 +1,14 @@
 # List
 
-Bifrost Wallet curates off-chain metadata (logos, names, links) for assets that appear in the wallet. The source of truth is [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Published data is available as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets), which includes dapps (curated, not self-serve). See [Consuming Assets](consuming-assets.md).
+Bifrost Wallet curates off-chain metadata (logos, names, links) for assets that appear in the wallet. The source of truth is [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Published data is available as [`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets). See [Consuming Assets](consuming-assets.md).
 
 ## What you can list
 
-| Type | Form | Status |
-| --- | --- | --- |
-| [Data provider](ftso-provider.md) | [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider) | Self-serve |
+| Type | Form |
+| --- | --- |
+| [Data provider](ftso-provider.md) | [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider) |
 
-Dapps are curated by the Bifrost team. Self-serve listing is only for data providers.
+The team also curates tokens, dapps, and contracts.
 
 Start at [bifrostwallet.com/list](https://bifrostwallet.com/list/) for the listing hub. Additional asset types may be documented here as the assets repository grows. There are **no paid listing fees** for the flows covered in these docs.
 

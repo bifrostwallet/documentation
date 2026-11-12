@@ -2,7 +2,7 @@
 
 List your data provider (and its validators) so Bifrost Wallet and other apps can show your logo, description, and entity metadata on Flare and Songbird.
 
-One listing covers your **provider identity** and nested **validator NodeIDs**. Validators are not a separate listing type.
+One listing covers your **provider identity** and nested **validator NodeIDs**.
 
 **List:** [bifrostwallet.com/list/provider](https://bifrostwallet.com/list/provider)
 
