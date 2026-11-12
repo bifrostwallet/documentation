@@ -1,23 +1,23 @@
 # Consuming Assets
 
-[`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) is the curated catalog of FTSO providers, validators, tokens, contracts, and dapps for Bifrost Wallet. Tokens, contracts, and dapps are curated by the Bifrost team.
+[`@bifrostwallet/assets`](https://www.npmjs.com/package/@bifrostwallet/assets) is the curated catalog of data providers, validators, tokens, contracts, and dapps for Bifrost Wallet. Tokens, contracts, and dapps are curated by the Bifrost team.
 
-The default is an exact version pin, then `const assets = createAssets()`. `baseURL` is optional. Omit it and logo URLs use jsDelivr pinned to that exact package version. Use `logoURL` directly, for example `{provider && <img src={provider.logoURL} alt="" />}`.
+The default is an exact version pin, then `const assets = createAssets()`. `baseURL` is optional. Omit it and logo URLs use jsDelivr pinned to that exact package version. Use `logoURL` directly. The example logs `provider.logoURL`.
 
 Source of truth: [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets). Package notes: [README](https://github.com/bifrostwallet/assets/blob/main/README.md).
 
-To list a provider, follow [FTSO provider](ftso-provider.md).
+To list a provider, follow [Data provider](ftso-provider.md).
 
 ## Install
 
-Pin one version and commit the lockfile.
+Install the latest release and commit the lockfile. The current release is on [npm](https://www.npmjs.com/package/@bifrostwallet/assets).
 
 ```sh
-npm install @bifrostwallet/assets@<version> --save-exact
+npm install @bifrostwallet/assets --save-exact
 ```
 
 ```sh
-yarn add @bifrostwallet/assets@<version> --exact
+yarn add @bifrostwallet/assets --exact
 ```
 
 ## Default usage
@@ -28,7 +28,7 @@ yarn add @bifrostwallet/assets@<version> --exact
 https://cdn.jsdelivr.net/gh/bifrostwallet/assets@<version>/data/
 ```
 
-`<version>` is the package version and the git tag (`1.0.0`). That tag is written into the package at build time. Returned `logoURL` values are absolute. A missing record is still `null`.
+`<version>` is the package version you install and its git tag. That tag is written into the package at build time. Returned `logoURL` values are absolute. A missing record is still `null`.
 
 An exact-version jsDelivr URL is immutable and never goes stale ([Caching](https://www.jsdelivr.com/documentation#id-caching)). Cache headers last one year, and the file is stored permanently.
 
@@ -36,7 +36,7 @@ Don't load lists or logos from `raw.githubusercontent.com`. GitHub's raw file ho
 
 The example reads one provider on `eip155:14` (Flare).
 
-```tsx
+```typescript
 import { createAssets } from "@bifrostwallet/assets";
 
 const assets = createAssets();
@@ -45,7 +45,8 @@ const provider = assets.getProvider(
   "0x1650d2760baee638c034200dedcbe17b050d0364",
 );
 
-{provider && <img src={provider.logoURL} alt="" />}
+// provider.logoURL is an absolute URL
+console.log(provider?.logoURL);
 ```
 
 Pass `baseURL` when you host the files yourself. The examples further down do that.
@@ -85,29 +86,29 @@ Dapps are a catalog like tokens, providers, and contracts.
 
 `assets.getTokens(chainId)`, `assets.getToken(chainId, address)`, `assets.getNativeToken(chainId)`, and `assets.getXrplToken(issuer, currency)` read the token catalog. `getXrplToken` keeps the issuer and currency case. `assets.getContracts` and `assets.getContract` read contract names. `assets.getDapps()` returns every dapp, and `assets.getDapp(slug)` returns one dapp or `null`. `assets.getDappCategories()` returns the browser chips. Show a dapp with `logoURL`, the same as a provider or token. The records themselves are described in [CONTRIBUTING.md](https://github.com/bifrostwallet/assets/blob/main/CONTRIBUTING.md).
 
-## Optional: check a downloaded logo
+## Check logo integrity (optional)
 
 Use this when you download logos or self-host them with `fetch-logos`. These checks are optional.
 
 `verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. `fetchLogo(entry)` is a convenience that downloads `logoURL` and runs that check in one step.
 
-## Self-hosting logos
+```typescript
+import { createAssets, verifyLogoHash } from "@bifrostwallet/assets";
 
-Self-hosting is optional. Self-host when you want a copy you control: `npx @bifrostwallet/assets@<version> fetch-logos ./logos` checks each file against the hash in that package. Pin the exact version and run it again on every bump.
+const assets = createAssets();
+const provider = assets.getProvider(
+  "eip155:14",
+  "0x1650d2760baee638c034200dedcbe17b050d0364",
+);
 
-Logo files are not in the npm package. You do not need to clone the repository.
-
-1. Download this version's logos. The command checks each file against the hash in the installed package. A missing hash or a mismatch does not write that file, and the command exits non-zero. Do not upload the directory if it fails.
-
-```sh
-npx --yes @bifrostwallet/assets@<version> fetch-logos ./logos
+const response = await fetch(provider.logoURL);
+const bytes = new Uint8Array(await response.arrayBuffer());
+console.log(verifyLogoHash(bytes, provider.logoHash));
 ```
 
-Files land at `./logos/providers/…`, `./logos/tokens/…`, `./logos/contracts/…`, and `./logos/dapps/…`.
+## Self-hosting logos
 
-2. Upload that directory to any static host or bucket. The public URL must serve those paths at its root. [Cloud Storage](https://cloud.google.com/storage/docs/uploading-objects) or [S3](https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html) can do that.
-
-3. Point the package at the public URL. `baseURL` must start with `https://`. A trailing slash is optional.
+Self-hosting is optional. `logoURL` is a path such as `providers/…/logo.webp`, and `baseURL` is joined to that path. Serve `providers/`, `tokens/`, `contracts/`, and `dapps/` at the host root. `baseURL` must start with `https://`. A trailing slash is optional. Upload again when the package or the clone changes. The default jsDelivr URL changes with the version. A copy you host does not.
 
 ```typescript
 import { createAssets } from "@bifrostwallet/assets";
@@ -117,7 +118,15 @@ const assets = createAssets({
 });
 ```
 
-4. When you bump `@bifrostwallet/assets`, pin the exact version, run `fetch-logos` for the new version, and upload again before you ship. The default jsDelivr URL changes with the version. A copy you host does not.
+**npm package only.** Logo files are not in the package. The command checks each file against the hash in the installed package. A missing hash or a mismatch does not write that file, and the command exits non-zero. Do not upload the directory if it fails.
+
+```sh
+npx --yes @bifrostwallet/assets fetch-logos ./logos
+```
+
+Upload `./logos`. Files land at `./logos/providers/…`, `./logos/tokens/…`, `./logos/contracts/…`, and `./logos/dapps/…`.
+
+**Repository clone.** In [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets), each logo file is `data/` plus that relative `logoURL`. Upload the `data` directory so `providers/`, `tokens/`, `contracts/`, and `dapps/` are at the host root. Use the same release as the package you install.
 
 ## Provider verification
 
@@ -155,7 +164,7 @@ await verifyTypedData(entry); // true
 
 Fetch provider `all.json` from jsDelivr on `@main` when you are not installing the package. `logoURL` in that file is already absolute and uses the same `@main` snapshot. There is no token `all.json`. Token lists are not published that way; use `createAssets`.
 
-`@main` is the moving catalog, not a release tag. Provider `all.json` logo URLs in this repository use that unpinned branch. Updates there can take up to 12 hours to appear because jsDelivr caches branch URLs for up to 12 hours ([Caching](https://www.jsdelivr.com/documentation#id-caching)). The npm package pins `@<version>` (`@1.0.0` for this release) so its logos match the installed snapshot.
+`@main` is the moving catalog, not a release tag. Provider `all.json` logo URLs in this repository use that unpinned branch. Updates there can take up to 12 hours to appear because jsDelivr caches branch URLs for up to 12 hours ([Caching](https://www.jsdelivr.com/documentation#id-caching)). The npm package pins the version you install so its logos match that snapshot.
 
 Use the jsDelivr URL above instead of raw GitHub.
 
