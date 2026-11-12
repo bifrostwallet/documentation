@@ -28,7 +28,7 @@ yarn add @bifrostwallet/assets@<version> --exact
 https://cdn.jsdelivr.net/gh/bifrostwallet/assets@<version>/data/
 ```
 
-`<version>` is the package version and the git tag (`1.0.0`). That tag is written into the package at build time. Returned `logoURL` values are absolute. A missing record is still `null`.
+`<version>` is the package version and the git tag (`1.1.0`). That tag is written into the package at build time. Returned `logoURL` values are absolute. A missing record is still `null`.
 
 An exact-version jsDelivr URL is immutable and never goes stale ([Caching](https://www.jsdelivr.com/documentation#id-caching)). Cache headers last one year, and the file is stored permanently.
 
@@ -155,7 +155,7 @@ await verifyTypedData(entry); // true
 
 Fetch provider `all.json` from jsDelivr on `@main` when you are not installing the package. `logoURL` in that file is already absolute and uses the same `@main` snapshot. There is no token `all.json`. Token lists are not published that way; use `createAssets`.
 
-`@main` is the moving catalog, not a release tag. Provider `all.json` logo URLs in this repository use that unpinned branch. Updates there can take up to 12 hours to appear because jsDelivr caches branch URLs for up to 12 hours ([Caching](https://www.jsdelivr.com/documentation#id-caching)). The npm package pins `@<version>` (`@1.0.0` for this release) so its logos match the installed snapshot.
+`@main` is the moving catalog, not a release tag. Provider `all.json` logo URLs in this repository use that unpinned branch. Updates there can take up to 12 hours to appear because jsDelivr caches branch URLs for up to 12 hours ([Caching](https://www.jsdelivr.com/documentation#id-caching)). The npm package pins `@<version>` (`@1.1.0` for this release) so its logos match the installed snapshot.
 
 Use the jsDelivr URL above instead of raw GitHub.
 
