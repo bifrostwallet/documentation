@@ -88,7 +88,7 @@ Dapps are a catalog like tokens, providers, and contracts.
 
 ## Check logo integrity (optional)
 
-Use this when you download logos or self-host them with `fetch-logos`. These checks are optional.
+Use this when you download logos. These checks are optional.
 
 `verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. `fetchLogo(entry)` is a convenience that downloads `logoURL` and runs that check in one step.
 
@@ -108,25 +108,37 @@ console.log(verifyLogoHash(bytes, provider.logoHash));
 
 ## Self-hosting logos
 
-Self-hosting is optional. `logoURL` is a path such as `providers/…/logo.webp`, and `baseURL` is joined to that path. Serve `providers/`, `tokens/`, `contracts/`, and `dapps/` at the host root. `baseURL` must start with `https://`. A trailing slash is optional. Upload again when the package or the clone changes. The default jsDelivr URL changes with the version. A copy you host does not.
+Self-hosting is optional. `logoURL` is a path such as `providers/…/logo.webp`, and `baseURL` is joined to that path. `baseURL` must start with `https://`. A trailing slash is optional. Upload again when you install a new package version. The default jsDelivr URL changes with the version. A copy you host does not.
 
-```typescript
-import { createAssets } from "@bifrostwallet/assets";
+1. Clone [https://github.com/bifrostwallet/assets](https://github.com/bifrostwallet/assets) and check out the tag that matches the `@bifrostwallet/assets` version you installed. Tags have no `v` prefix.
 
-const assets = createAssets({
-  baseURL: "https://assets.example.com/",
-});
-```
+   ```sh
+   git clone https://github.com/bifrostwallet/assets
+   cd assets
+   git checkout <version>
+   ```
 
-**npm package only.** Logo files are not in the package. The command checks each file against the hash in the installed package. A missing hash or a mismatch does not write that file, and the command exits non-zero. Do not upload the directory if it fails.
+2. Upload only the `logo.webp` files from `data/` to your own host, keeping `tokens/`, `providers/`, `dapps/`, and `contracts/projects/`. Point the package's `baseURL` at that host. Serve those directories at the host root.
 
-```sh
-npx --yes @bifrostwallet/assets fetch-logos ./logos
-```
+   Google Cloud. `--exclude` is a Python regular expression. It skips every relative path that does not end in `logo.webp`, and `--recursive` still walks the directories:
 
-Upload `./logos`. Files land at `./logos/providers/…`, `./logos/tokens/…`, `./logos/contracts/…`, and `./logos/dapps/…`.
+   ```sh
+   gcloud storage rsync data gs://<your-bucket> --recursive --exclude='^(?!.*logo\.webp$).*'
+   ```
 
-**Repository clone.** In [`bifrostwallet/assets`](https://github.com/bifrostwallet/assets), each logo file is `data/` plus that relative `logoURL`. Upload the `data` directory so `providers/`, `tokens/`, `contracts/`, and `dapps/` are at the host root. Use the same release as the package you install.
+   Amazon S3. Filters run in order and the last match wins, so exclude everything first, then include `logo.webp`. `*` matches `/`:
+
+   ```sh
+   aws s3 sync data s3://<your-bucket> --exclude '*' --include '*logo.webp'
+   ```
+
+   ```typescript
+   import { createAssets } from "@bifrostwallet/assets";
+
+   const assets = createAssets({
+     baseURL: "https://assets.example.com/",
+   });
+   ```
 
 ## Provider verification
 
