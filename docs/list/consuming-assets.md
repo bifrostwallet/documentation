@@ -115,17 +115,22 @@ Self-hosting is optional. `logoURL` is a path such as `providers/…/logo.webp`,
    ```sh
    git clone https://github.com/bifrostwallet/assets
    cd assets
-   git checkout 1.2.2
+   git checkout <version>
    ```
 
-2. Install dependencies and run `./yarn export:logos ./logos`. It copies only the `logo.webp` files, checks each against the catalog `logoHash`, and fails on any mismatch.
+2. Upload only the `logo.webp` files from `data/` to your own host, keeping `tokens/`, `providers/`, `dapps/`, and `contracts/projects/`. Point the package's `baseURL` at that host. Serve those directories at the host root.
+
+   Google Cloud. `--exclude` is a Python regular expression. It skips every relative path that does not end in `logo.webp`, and `--recursive` still walks the directories:
 
    ```sh
-   ./yarn install
-   ./yarn export:logos ./logos
+   gcloud storage rsync data gs://<your-bucket> --recursive --exclude='^(?!.*logo\.webp$).*'
    ```
 
-3. Upload the `./logos` tree (`tokens/`, `providers/`, `dapps/`, `contracts/projects/`) to your own host or bucket, and point the package's `baseURL` at it. Serve those directories at the host root.
+   Amazon S3. Filters run in order and the last match wins, so exclude everything first, then include `logo.webp`. `*` matches `/`:
+
+   ```sh
+   aws s3 sync data s3://<your-bucket> --exclude '*' --include '*logo.webp'
+   ```
 
    ```typescript
    import { createAssets } from "@bifrostwallet/assets";
