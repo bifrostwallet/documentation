@@ -20,6 +20,6 @@ Provider → listing form (sign) → verified → curated into bifrostwallet/ass
 
 You do not need a GitHub account to submit a provider through the listing form. Curators review before the listing goes live; submission does not guarantee acceptance.
 
-Logos should be a PNG or SVG source with alpha (a transparent background). The published `logo.webp` is **128×128**, at most **24 KB**, and keeps that transparency. A logo change on an entry that already has a self-signature changes `logoHash`. Re-upload the logo and sign the entry again. See [Logo requirements](ftso-provider.md#logo-requirements).
+Logos should be PNG or WebP. A transparent background is recommended. The published `logo.webp` is **128×128**, at most **24 KB**, and keeps that transparency. A logo change on an entry that already has a self-signature changes `logoHash`. Re-upload the logo and sign the entry again. See [Logo requirements](ftso-provider.md#logo-requirements).
 
 For data providers, acceptance into the catalog (name and logo) is separate from `listed: true`, which Bifrost Wallet uses for picker visibility. See [Data provider](ftso-provider.md#catalog-vs-listed).

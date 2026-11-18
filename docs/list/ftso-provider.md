@@ -16,7 +16,7 @@ These listing requirements are a draft and open for discussion. We want feedback
 
 * A registered FTSO entity on `eip155:14` (Flare) or `eip155:19` (Songbird)
 * Control of the entity **identity address** (you will sign with it)
-* A PNG or SVG logo with alpha (a transparent background); see [logo requirements](#logo-requirements)
+* A PNG or WebP logo (a transparent background is recommended); see [logo requirements](#logo-requirements)
 
 ## Submit via the listing form
 
@@ -31,7 +31,7 @@ Submitting again updates a pending submission. To change a live listing later, g
 
 ## Logo requirements
 
-Upload a **PNG or SVG** source with alpha (a transparent background), at least **128×128**. Larger images are fine; the form cover-fits and converts to the catalog form before hash/sign. The published `logo.webp` keeps that transparency.
+Upload **PNG or WebP** at least **128×128**. Larger images are fine; the form cover-fits and converts to the catalog form before hash/sign. A transparent background is recommended. The published `logo.webp` keeps that transparency.
 
 * Exact **128×128** WebP
 * Maximum file size **24 KB**
