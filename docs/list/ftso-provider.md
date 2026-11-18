@@ -16,7 +16,7 @@ These listing requirements are a draft and open for discussion. We want feedback
 
 * A registered FTSO entity on `eip155:14` (Flare) or `eip155:19` (Songbird)
 * Control of the entity **identity address** (you will sign with it)
-* A logo the form can convert (PNG or WebP); see [logo requirements](#logo-requirements)
+* A PNG or SVG logo with alpha (a transparent background); see [logo requirements](#logo-requirements)
 
 ## Submit via the listing form
 
@@ -31,13 +31,15 @@ Submitting again updates a pending submission. To change a live listing later, g
 
 ## Logo requirements
 
-Upload **PNG or WebP** at least **128×128**. Larger images are fine; the form cover-fits and converts to the catalog form before hash/sign:
+Upload a **PNG or SVG** source with alpha (a transparent background), at least **128×128**. Larger images are fine; the form cover-fits and converts to the catalog form before hash/sign. The published `logo.webp` keeps that transparency.
 
-* Exact **128×128** WebP. A transparent background is recommended. Opaque WebP, including a solid white background, stays valid
-* Maximum file size **24 KB**. Size checks require neither opacity nor a white background
+* Exact **128×128** WebP
+* Maximum file size **24 KB**
 * Stored as `logo.webp`; `logoHash` is the SHA-256 of those WebP bytes
 
 Preview shows the **converted** WebP. New intake rejects logos that are not this **128×128** WebP within **24 KB**.
+
+A logo change on an entry that already has a self-signature changes `logoHash`. Re-upload the logo and sign the entry again through the listing form.
 
 ## What gets stored
 
@@ -58,6 +60,8 @@ Each provider lives under `data/providers/<chain>/<identityAddress>/` with `info
 | `firstTransaction` | no | Earliest known on-chain activity. It can be used to compare how long providers have been around, for example to tell long-standing providers from newcomers |
 
 Signatures use **EIP-712** (`eth_signTypedData_v4`, domain `Bifrost Assets`). The signed JSON is your listing text, `identityAddress`, `acknowledgedResponsibilities`, and `logoHash`. It excludes `logoURL`, `listed`, `managementGroup`, `domainLinked`, `dualNetwork`, `firstTransaction`, and the chain snapshot (`delegationAddress`, `signingPolicyAddress`, `submitAddress`, `submitSignaturesAddress`, `publicKey`, `validators`).
+
+Changing a signed field needs a new self-signature. A logo change changes `logoHash`, so re-upload the logo and sign the entry again through the listing form.
 
 The signature requirement is a **self-signature** by your identity address. Some listings stay unsigned until 31 December 2026 (date to be confirmed with the provider community). After a date finally determined together with the existing providers, listed providers without a valid self-signature and a linked domain (`domainLinked: true`) are delisted from Bifrost Wallet, and relisted when the requirements are met.
 
