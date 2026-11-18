@@ -74,7 +74,7 @@ That call uses `eip155:14` (Flare). With `baseURL` set, `logoURL` is absolute on
 
 ### Listed validators
 
-`assets.getListedValidators(chainId)` returns one entry per NodeID for providers with `listed: true`, in that provider order. Each entry has `nodeId`, `identityAddress`, `name`, and the operating provider's `logoURL`. `assets.getValidators(chainId)` returns every validator on the chain, including validators of providers that are not listed.
+`assets.getListedValidators(chainId)` returns one entry per NodeID for providers with `listed: true`, in that provider order. Each entry has `nodeId`, `identityAddress`, `name`, and the operating provider's `logoURL`. The logo is the provider logo and keeps a transparent background. `assets.getValidators(chainId)` returns every validator on the chain, including validators of providers that are not listed.
 
 ### Validators for one identity
 
@@ -144,7 +144,7 @@ Self-hosting is optional. `logoURL` is a path such as `providers/…/logo.webp`,
 
 Operator signatures ship from `@bifrostwallet/assets/signatures`, so a normal import does not download them. Some listings stay unsigned until 31 December 2026 (date to be confirmed with the provider community). Curator fields such as `listed` sit outside the signature. An unknown chain throws. A missing provider or signature returns an empty array.
 
-The signature is EIP-712 (`eth_signTypedData_v4`) over `ProviderListing`, self-signed by the identity address. Changing any signed field needs a new signature. `logoHash` is the SHA-256 of `logo.webp`: 64 lowercase hex characters, with no `0x` prefix.
+The signature is EIP-712 (`eth_signTypedData_v4`) over `ProviderListing`, self-signed by the identity address. Changing any signed field needs a new signature. `logoHash` is the SHA-256 of `logo.webp`: 64 lowercase hex characters, with no `0x` prefix. Provider `logo.webp` files keep a transparent background. A logo change changes `logoHash`, so the provider re-uploads the logo and signs the entry again through the listing form.
 
 **Domain**
 
@@ -190,7 +190,7 @@ Compared with the package and logos you host:
 
 1. Fetch `https://cdn.jsdelivr.net/gh/bifrostwallet/assets@main/data/providers/<chain>/all.json`. The chain directory uses a hyphen, such as `eip155-14` (Flare) or `eip155-19` (Songbird).
 2. For listed providers, keep records with `listed: true`. Check `logoHash` against the logo bytes before you display the image. `logoURL` is absolute.
-3. For listed validator NodeIDs, read `validators` on those records. The logo is the provider logo.
+3. For listed validator NodeIDs, read `validators` on those records. The logo is the provider logo, and it keeps a transparent background.
 
 ```js
 const response = await fetch(
