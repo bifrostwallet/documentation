@@ -90,31 +90,27 @@ Dapps are a catalog like tokens, providers, and contracts.
 
 Use this when you download logos. These checks are optional.
 
-`verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. Fetch `logoURL`, then pass those response bytes to `verifyLogoHash`. Display or cache the file only after the check passes. Rejecting a response over 256KB is optional.
+`verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. Fetch `logoURL`, then pass those response bytes to `verifyLogoHash`. Display or cache the file only after the check passes.
 
 `entry` is any catalog record with `logoURL` and `logoHash`, such as a provider, token, contract, or dapp.
 
-```typescript
+```ts
 import { createAssets, verifyLogoHash } from "@bifrostwallet/assets";
 
 const assets = createAssets();
+// Optional: createAssets({ baseURL: "https://assets.example.com/" }) when you host the files.
 const entry = assets.getProvider(
   "eip155:14",
   "0x1650d2760baee638c034200dedcbe17b050d0364",
 );
-if (!entry) throw new Error("missing provider");
+if (!entry) throw new Error("missing catalog entry");
 
 const response = await fetch(entry.logoURL);
-if (!response.ok) {
-  throw new Error(`Could not fetch logo: HTTP ${response.status}`);
-}
+if (!response.ok) throw new Error("Could not download logo");
 const bytes = new Uint8Array(await response.arrayBuffer());
-// Optional: reject a response over 256KB.
-if (bytes.byteLength > 256 * 1024) {
-  throw new Error("Could not fetch logo: response exceeds 256KB");
-}
+if (bytes.byteLength > 256 * 1024) throw new Error("logo exceeds 256KB");
 if (!verifyLogoHash(bytes, entry.logoHash)) throw new Error("logo hash mismatch");
-// Display or cache `bytes` only after the hash matches.
+// Display or cache the image only after the hash matches.
 ```
 
 Hash the original bytes as served, not a resized/transcoded image (image proxies and CDN optimizers change bytes), and don't round-trip through text.
