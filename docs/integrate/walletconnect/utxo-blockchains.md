@@ -67,6 +67,8 @@ Sign a PSBT supplied by the dapp.
 | `signInputs` | array | yes | `{ address, index, sighashTypes? }[]` |
 | `broadcast` | boolean | no | Default `false`. If `true`, all inputs must be owned by the wallet |
 
+Only `SIGHASH_ALL` is supported. Leave `sighashTypes` out, or send `[1]`. A request with any other value is rejected with error code `-32602` and the message `Only SIGHASH_ALL (1) is supported`.
+
 ### signMessage
 
 Sign a message with ECDSA.
