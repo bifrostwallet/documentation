@@ -90,21 +90,30 @@ Dapps are a catalog like tokens, providers, and contracts.
 
 Use this when you download logos. These checks are optional.
 
-`verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. `fetchLogo(entry)` is a convenience that downloads `logoURL` and runs that check in one step.
+`verifyLogoHash(bytes, logoHash)` is true when the SHA-256 of the decoded file bytes equals `logoHash`: 64 lowercase hex characters, no `0x` prefix. Fetch `logoURL`, then pass those response bytes to `verifyLogoHash`. Display or cache the file only after the check passes.
 
-```typescript
+`entry` is any catalog record with `logoURL` and `logoHash`, such as a provider, token, contract, or dapp.
+
+```ts
 import { createAssets, verifyLogoHash } from "@bifrostwallet/assets";
 
 const assets = createAssets();
-const provider = assets.getProvider(
+// Optional: createAssets({ baseURL: "https://assets.example.com/" }) when you host the files.
+const entry = assets.getProvider(
   "eip155:14",
   "0x1650d2760baee638c034200dedcbe17b050d0364",
 );
+if (!entry) throw new Error("missing catalog entry");
 
-const response = await fetch(provider.logoURL);
+const response = await fetch(entry.logoURL);
+if (!response.ok) throw new Error("Could not download logo");
 const bytes = new Uint8Array(await response.arrayBuffer());
-console.log(verifyLogoHash(bytes, provider.logoHash));
+if (bytes.byteLength > 256 * 1024) throw new Error("logo exceeds 256KB");
+if (!verifyLogoHash(bytes, entry.logoHash)) throw new Error("logo hash mismatch");
+// Display or cache the image only after the hash matches.
 ```
+
+Hash the original bytes as served, not a resized/transcoded image (image proxies and CDN optimizers change bytes), and don't round-trip through text.
 
 ## Self-hosting logos
 
@@ -189,7 +198,7 @@ Compared with the package and logos you host:
 - No signature checks. Those ship on `@bifrostwallet/assets/signatures`.
 
 1. Fetch `https://cdn.jsdelivr.net/gh/bifrostwallet/assets@main/data/providers/<chain>/all.json`. The chain directory uses a hyphen, such as `eip155-14` (Flare) or `eip155-19` (Songbird).
-2. For listed providers, keep records with `listed: true`. Check `logoHash` against the logo bytes before you display the image. `logoURL` is absolute.
+2. For listed providers, keep records with `listed: true`. Check `logoHash` against the logo bytes before you display the image. The steps are in [Check logo integrity](#check-logo-integrity-optional). `logoURL` is absolute.
 3. For listed validator NodeIDs, read `validators` on those records. The logo is the provider logo, and it keeps a transparent background.
 
 ```js
