@@ -40,8 +40,22 @@ jobs:
       - name: Lint YAML
         run: ./scripts/lint-yaml.sh
 
+      # Offline: when the launcher adds --check-cache, not the check itself.
+      - name: Test Yarn launcher rules
+        run: ./scripts/security/yarn-launcher-fixtures.sh
+
+      # Offline: which PnP file states the check after install accepts.
+      - name: Test PnP file check rules
+        run: ./scripts/security/verify-pnp-files-fixtures.sh
+
       - name: Install dependencies
         run: ./yarn install --immutable
+
+      # The install rewrote .pnp.cjs / .pnp.loader.mjs from yarn.lock. Any
+      # difference from the commit means the committed loaders are not what
+      # Yarn generates (they run on every ./yarn run, and nobody reviews them).
+      - name: Verify committed PnP files match the install
+        run: ./scripts/security/verify-pnp-files.sh
 
       - name: Lint with Biome
         run: ./yarn lint
