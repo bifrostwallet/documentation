@@ -1,0 +1,44 @@
+# TEMPORARY: records package-attestations.json on a GitHub runner (which can
+# reach the Sigstore TUF repository) and commits it to this pull request's
+# branch. Removed in the next commit of the same pull request.
+
+name: Attestations baseline
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+env:
+  COREPACK_ENABLE: "0"
+
+jobs:
+  baseline:
+    name: Record attestations baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+
+      - name: Record the baseline (.)
+        working-directory: .
+        run: ./scripts/security/verify-attestations.sh update
+
+      - name: Commit the baseline
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-attestations.json
+          git commit -m "Record the attestations baseline" || exit 0
+          git push origin "HEAD:$BRANCH"
