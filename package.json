@@ -17,7 +17,7 @@
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "preinstall": "./scripts/security/require-verified-yarn.sh && ./scripts/security/block-ide-autostart-hooks.sh",
-    "prepare": "./scripts/security/require-verified-yarn.sh && ./scripts/security/block-ide-autostart-hooks.sh && ./scripts/install-git-hooks.sh",
+    "postinstall": "./scripts/install-git-hooks.sh",
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "lint:shell": "./scripts/lint-shell.sh",
