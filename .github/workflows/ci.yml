@@ -28,14 +28,6 @@ jobs:
       - name: Run security checks
         run: ./scripts/security/security-checks.sh
 
-      # Offline: when the launcher adds --check-cache, not the check itself.
-      - name: Test Yarn launcher rules
-        run: ./scripts/security/yarn-launcher-fixtures.sh
-
-      # Offline: which PnP file states the check after install accepts.
-      - name: Test PnP file check rules
-        run: ./scripts/security/verify-pnp-files-fixtures.sh
-
       # ShellCheck and yamllint are preinstalled on GitHub's ubuntu-24.04
       # runner image; nothing is downloaded or installed at CI time.
       - name: Lint shell scripts
@@ -43,6 +35,14 @@ jobs:
 
       - name: Lint YAML
         run: ./scripts/lint-yaml.sh
+
+      # Offline: when the launcher adds --check-cache, not the check itself.
+      - name: Test Yarn launcher rules
+        run: ./scripts/security/yarn-launcher-fixtures.sh
+
+      # Offline: which PnP file states the check after install accepts.
+      - name: Test PnP file check rules
+        run: ./scripts/security/verify-pnp-files-fixtures.sh
 
       - name: Install dependencies
         run: ./yarn install --immutable
