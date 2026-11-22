@@ -1,8 +1,0 @@
-name: Alias on
-trig: &trig push
-on: *trig
-jobs:
-  v:
-    runs-on: ubuntu-24.04
-    steps:
-      - run: echo ok
