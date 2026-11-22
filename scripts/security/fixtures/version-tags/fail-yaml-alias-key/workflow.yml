@@ -1,0 +1,10 @@
+name: Alias key
+ev: &ev push
+on:
+  ? *ev
+  :
+jobs:
+  v:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: echo ok

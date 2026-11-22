@@ -249,9 +249,9 @@ is_null_value() {
 }
 
 # 0 when $1 has an unquoted YAML alias (*name) as a value, including
-# "key: *name" and "- *name". Quoted stars ('v*', "**") and comments are
-# ignored. A '*' that does not start an alias name (globs such as "**" or
-# "*.txt") is left alone.
+# "key: *name", "- *name", and "? *name". A name may start with any
+# non-space character other than the flow indicators , [ ] { }. Quoted
+# stars ('v*', "**") and comments are ignored.
 has_yaml_alias() {
   _s=$(strip_yaml_comment "$1")
   _q=
@@ -283,7 +283,7 @@ has_yaml_alias() {
       _here=0
       case "$_ns" in
         '' | ':' | '[' | '{' | ',') _here=1 ;;
-        '-')
+        '-' | '?')
           if [ "$_gap" -eq 1 ]; then
             _here=1
           fi
@@ -292,9 +292,8 @@ has_yaml_alias() {
       if [ "$_here" -eq 1 ]; then
         _d=${_s%"${_s#?}"}
         case "$_d" in
-          [A-Za-z0-9_])
-            return 0
-            ;;
+          '' | ' ' | '	' | ',' | '[' | ']' | '{' | '}') ;;
+          *) return 0 ;;
         esac
       fi
     fi
