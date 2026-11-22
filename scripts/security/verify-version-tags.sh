@@ -4,7 +4,12 @@
 #   - filters push tags with anything other than [0-9]+.[0-9]+.[0-9]+,
 #   - lets a push or create trigger run for every tag,
 #   - hides a tag filter inside a flow mapping the line scanner cannot read, or
-#   - inlines a ref/tag expression inside a run: block.
+#   - inlines a ref/tag expression inside a run: block, or
+#   - continues an inline run: value onto more lines, or starts it on the
+#     next line without | or > (plain or quoted scalars fold, so those
+#     lines are part of the command).
+# A run: value is checked as a whole, so an expression split across lines
+# (${{ on one line, github.head_ref }} on the next) is still caught.
 #
 # Tag values belong in step env (see README.md, Security: Repository rules
 # checked in CI).
@@ -25,10 +30,14 @@ ROOT=$(CDPATH='' cd -- "$(dirname "$0")/../.." && pwd)
 cd "$ROOT"
 
 STRICT='[0-9]+.[0-9]+.[0-9]+'
-# Case-insensitive. `.*` crosses nested `}` so format('{0}', github.ref_name)
-# still matches. head.ref / base.ref are the pull_request forms of head_ref /
-# base_ref. github.ref also matches github.ref_name.
-RUN_EXPR='\$\{[[:space:]]*\{.*(github\.((event\.)?ref)|head[._]ref|base[._]ref|release\.(tag_)?name|inputs\.tag|tag_name)'
+# Matched case-insensitively inside each ${{ ... }} of a run: value (the
+# whole value, joined across lines). head.ref / base.ref are the pull_request
+# forms of head_ref / base_ref. github.ref also matches github.ref_name.
+# head_branch is the workflow_run form. Any github[...] index access fails
+# closed, and an index naming ref / head_branch / tag_name (['ref']) counts
+# like the dotted forms.
+REF_RE='github\.(event\.)?ref|head[._]ref|base[._]ref|release\.(tag_)?name|inputs\.tag|tag_name|head_branch|github[[:space:]]*\[|\[[^]]*(ref|head_branch|tag_name)[^]]*\]'
+export REF_RE
 
 SCAN_DIR=${VERSION_TAG_SCAN_DIR:-.github/workflows}
 
@@ -113,9 +122,34 @@ check_pattern() {
   fi
 }
 
+# $1 run: text (lines joined), $2 line to report. Each ${{ ... }} body is
+# tested on its own; an unterminated ${{ runs to the end and fails closed.
+# REF_RE goes through ENVIRON so awk does not rewrite its backslashes.
 check_run_text() {
-  if printf '%s\n' "$1" | grep -Eiq "$RUN_EXPR"; then
-    record "$lineno" "ref or tag expression inline in run: (bind it to env)"
+  if printf '%s\n' "$1" | awk '
+    { t = t $0 " " }
+    END {
+      re = ENVIRON["REF_RE"]
+      s = tolower(t)
+      while (match(s, /\$\{[[:space:]]*\{/)) {
+        s = substr(s, RSTART + RLENGTH)
+        e = index(s, "}}")
+        seg = (e > 0) ? substr(s, 1, e - 1) : s
+        if (seg ~ re) exit 0
+        if (e == 0) break
+        s = substr(s, e + 2)
+      }
+      exit 1
+    }'; then
+    record "$2" "ref or tag expression inline in run: (bind it to env)"
+  fi
+}
+
+# End of a run: value. Check the whole value once.
+flush_run() {
+  if [ "$in_run" -eq 1 ]; then
+    check_run_text "$run_buf" "$run_start"
+    in_run=0
   fi
 }
 
@@ -228,6 +262,10 @@ scan_file() {
   current=$1
   in_run=0
   run_indent=0
+  run_inline=0
+  run_quoted=0
+  run_start=0
+  run_buf=
   in_on=0
   on_indent=0
   on_child_indent=-1
@@ -250,10 +288,55 @@ scan_file() {
     if [ "$in_run" -eq 1 ]; then
       _lead=${line%%[![:space:]]*}
       if [ "${#_lead}" -gt "$run_indent" ]; then
-        check_run_text "$trimmed"
-        continue
+        # run_inline: 0 block scalar (| or >), 1 inline value, 2 already
+        # rejected, 3 value not started yet (run: with nothing after it).
+        case "$run_inline" in
+          0)
+            # Literal/folded text: every line is command text, # lines too.
+            run_buf="${run_buf}
+${trimmed}"
+            continue
+            ;;
+          3)
+            case "$trimmed" in
+              \#*)
+                continue
+                ;;
+            esac
+            # A key here means run: is a mapping (defaults: run:), not a
+            # command. Hand the line to the normal key path.
+            if printf '%s\n' "$trimmed" | grep -Eq '^[A-Za-z0-9_-]+:([[:space:]]|$)'; then
+              in_run=0
+            else
+              case "$trimmed" in
+                \"* | \'*) run_quoted=1 ;;
+              esac
+              record "$lineno" "run: value starts on the next line without | or > (use run: |)"
+              run_inline=2
+              run_buf=$trimmed
+              continue
+            fi
+            ;;
+          *)
+            # Inline value continued. In a plain scalar a # line is a
+            # comment (and ends the value); inside quotes it is text that
+            # YAML folds into the command, so it counts.
+            if [ "$run_quoted" -eq 0 ]; then
+              case "$trimmed" in
+                \#*) continue ;;
+              esac
+            fi
+            if [ "$run_inline" -eq 1 ]; then
+              record "$lineno" "inline run: value continues onto another line (use run: |)"
+              run_inline=2
+            fi
+            run_buf="${run_buf}
+${trimmed}"
+            continue
+            ;;
+        esac
       fi
-      in_run=0
+      flush_run
     fi
 
     case "$trimmed" in
@@ -335,15 +418,27 @@ scan_file() {
     fi
 
     if [ "$key" = "run" ]; then
-      if is_block_scalar "$rest"; then
-        in_run=1
-        # `- run:` is indented at the dash. Sibling keys (`env`) sit at dash+2.
-        run_indent=$_indent
-        case "$trimmed" in
-          -*) run_indent=$((_indent + 2)) ;;
-        esac
+      # Block scalars and inline values both own the more-indented lines that
+      # follow: a plain, single- or double-quoted value can continue there.
+      in_run=1
+      # `- run:` is indented at the dash. Sibling keys (`env`) sit at dash+2.
+      run_indent=$_indent
+      case "$trimmed" in
+        -*) run_indent=$((_indent + 2)) ;;
+      esac
+      run_start=$lineno
+      run_quoted=0
+      run_buf=
+      if [ -z "$rest" ]; then
+        run_inline=3
+      elif is_block_scalar "$rest"; then
+        run_inline=0
       else
-        check_run_text "$rest"
+        run_inline=1
+        run_buf=$rest
+        case "$rest" in
+          \"* | \'*) run_quoted=1 ;;
+        esac
       fi
     fi
 
@@ -393,6 +488,7 @@ scan_file() {
     fi
   done <"$current"
 
+  flush_run
   close_push
 
   if [ "$in_tags" -eq 1 ] && [ "$tags_count" -eq 0 ]; then
