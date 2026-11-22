@@ -27,6 +27,16 @@ Developer documentation for [docs.bifrostwallet.com](https://docs.bifrostwallet.
 
 Content lives under `docs/`. Sidebar: `sidebars.js`. Theme: `src/css/custom.css`.
 
+## Security
+
+Report vulnerabilities as described in [SECURITY.md](SECURITY.md).
+
+### Repository rules checked in CI
+
+- **Runtime lanes:** every `tsconfig*.json` declares one module lane. Node services, CLIs, scripts and tests use `module` and `moduleResolution` `NodeNext` (`tsc` emits to `dist`, `node` runs it). UI that a bundler emits (Vite, Expo/Metro) uses `module` `Preserve` with `moduleResolution` `Bundler`. Any other pair, such as `ESNext` with `Bundler`, is refused: it type-checks imports Node cannot resolve at run time. A config that sets neither key must extend a local tsconfig. Checked by `scripts/security/verify-tsconfig-lanes.sh`.
+- **Version tags:** a workflow that runs on tags filters them as `x.y.z` only (`'[0-9]+.[0-9]+.[0-9]+'`) and never runs for every tag. A tag or ref reaches a `run` script through step `env` and is read as a quoted shell variable, never as a `${{ }}` expression inside `run`: a tag name is attacker-controlled text, and Actions expands `${{ }}` before the shell starts. Checked by `scripts/security/verify-version-tags.sh`.
+- **Build origin:** `package-attestations.json` records the source repository of every package that publishes provenance. CI checks registry signatures and build attestations when the lockfile changes. Checked by `scripts/security/verify-attestations.sh`.
+
 ## License
 
 [MIT](LICENSE) © Bifrost Software Ltd

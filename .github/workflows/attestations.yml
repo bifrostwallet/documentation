@@ -1,7 +1,8 @@
 # Registry signatures and build attestations (npm provenance) of every package
 # in yarn.lock. Needs the network, so it is not part of security-checks.sh.
 # Runs when the lockfile changes, and when the baseline, the pinned Node (whose
-# npm is the verifier) or the check itself changes. See docs/security-scripts.md.
+# npm is the verifier) or the check itself changes. See README.md, Security:
+# Repository rules checked in CI.
 
 name: Attestations
 

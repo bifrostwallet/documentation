@@ -14,7 +14,8 @@
 # The cryptographic verification is not written here. It is done by the
 # verifier inside the npm that ships with the pinned Node (pacote + sigstore,
 # the code behind `npm audit signatures`), loaded from the Node installation,
-# never from this repository's dependencies. See docs/security-scripts.md.
+# never from this repository's dependencies. See README.md, Security: Repository
+# rules checked in CI.
 #
 # Fails when:
 #   - a registry signature is missing or invalid
