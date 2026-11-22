@@ -3,7 +3,8 @@
 # Fail when a GitHub Actions workflow under .github/workflows:
 #   - filters push tags with anything other than [0-9]+.[0-9]+.[0-9]+,
 #   - lets a push or create trigger run for every tag,
-#   - hides a tag filter inside a flow mapping the line scanner cannot read, or
+#   - hides a tag filter inside a flow mapping the line scanner cannot read,
+#   - uses a YAML alias (*name) as a value, or
 #   - inlines a ref/tag expression inside a run: block, or
 #   - continues an inline run: value onto more lines, or starts it on the
 #     next line without | or > (plain or quoted scalars fold, so those
@@ -14,9 +15,11 @@
 # Tag values belong in step env (see README.md, Security: Repository rules
 # checked in CI).
 # Line-oriented POSIX sh + grep -E. Standard workflow layout only.
-# Unrecognized tags values, `{` flow mappings under on:, and unfiltered
-# push/create triggers fail closed, whether on: is a scalar, a flow sequence,
-# a block sequence (- push), or a mapping (including push: ~ / push: null).
+# Unrecognized tags values, `{` flow mappings under on:, YAML aliases, and
+# unfiltered push/create triggers fail closed, whether on: is a scalar, a
+# flow sequence, a block sequence (- push), or a mapping (including
+# push: ~ / push: null). A '*' inside quotes ('v*', "**") or a comment is
+# not an alias.
 # VERSION_TAG_SCAN_DIR overrides the workflow directory (fixture runner).
 
 set -eu
@@ -245,6 +248,62 @@ is_null_value() {
   [ "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" = "null" ]
 }
 
+# 0 when $1 has an unquoted YAML alias (*name) as a value, including
+# "key: *name" and "- *name". Quoted stars ('v*', "**") and comments are
+# ignored. A '*' that does not start an alias name (globs such as "**" or
+# "*.txt") is left alone.
+has_yaml_alias() {
+  _s=$(strip_yaml_comment "$1")
+  _q=
+  _ns=
+  _gap=1
+  while [ -n "$_s" ]; do
+    _c=${_s%"${_s#?}"}
+    _s=${_s#?}
+    case "$_c" in
+      "'" | '"')
+        if [ -z "$_q" ]; then
+          _q=$_c
+        elif [ "$_q" = "$_c" ]; then
+          _q=
+        fi
+        continue
+        ;;
+    esac
+    if [ -n "$_q" ]; then
+      continue
+    fi
+    case "$_c" in
+      ' ' | '	')
+        _gap=1
+        continue
+        ;;
+    esac
+    if [ "$_c" = '*' ]; then
+      _here=0
+      case "$_ns" in
+        '' | ':' | '[' | '{' | ',') _here=1 ;;
+        '-')
+          if [ "$_gap" -eq 1 ]; then
+            _here=1
+          fi
+          ;;
+      esac
+      if [ "$_here" -eq 1 ]; then
+        _d=${_s%"${_s#?}"}
+        case "$_d" in
+          [A-Za-z0-9_])
+            return 0
+            ;;
+        esac
+      fi
+    fi
+    _ns=$_c
+    _gap=0
+  done
+  return 1
+}
+
 is_block_scalar() {
   _ind=$(trim "$1")
   case "$_ind" in
@@ -342,6 +401,10 @@ ${trimmed}"
     case "$trimmed" in
       \#*) continue ;;
     esac
+
+    if has_yaml_alias "$trimmed"; then
+      record "$lineno" "YAML aliases are not supported in workflows"
+    fi
 
     if [ "$in_tags" -eq 1 ]; then
       case "$trimmed" in
