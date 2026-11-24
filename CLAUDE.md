@@ -37,3 +37,9 @@ Match the pages already in `docs/`.
 Keep the pins intact. Versions in `package.json` are exact. `engines.node`, `engines.yarn`, and `packageManager` (including its sha256) stay aligned with `.node-version`, `.nvmrc`, and the Yarn binary in `.yarn/releases`. Do not hand-edit `yarn.lock`, `.yarn/cache`, `.pnp.cjs`, `.pnp.loader.mjs`, `.yarn/yarn-binary-hash.txt`, or `package-attestations.json`.
 
 Workflows run on `ubuntu-24.04`. Actions and images are pinned to a full SHA or digest. Pass untrusted `${{ }}` values through step `env:` and read them as quoted shell variables, never inside `run:`. Do not add dependencies. `enableScripts` stays false.
+
+## Approval
+
+These do not need approval: `git commit`, a non-force `git push` of the current feature branch, amending or fixing up an unpushed commit, `gh pr create`, and `gh pr edit`, `gh pr comment`, or a review-thread reply on the pull request this work opened.
+
+These still need approval: pushing to or creating `main` or a release or tag ref, creating a tag, `git push --tags`, deleting a remote branch, amending or rewriting a pushed commit, writing git config, `sudo`, Docker or Kubernetes changes, a gcloud command that is not read-only, and any other mutating `gh` or `gh api` call. Branch protection on `main` blocks a direct push to `main`.
