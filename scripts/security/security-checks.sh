@@ -35,8 +35,18 @@ printf '%b\n' "${YELLOW}6 of 6: Verifying tsconfig module lanes (NodeNext or Bun
 ./scripts/security/verify-tsconfig-lanes-fixtures.sh
 echo
 
-# The workflow tag rules (verify-version-tags.sh) are not here: they read
-# .github/ only, and this script runs on every ./yarn call. CI, the pre-commit
-# hook and release workflows run verify-version-tags-if-changed.sh.
+# The workflow tag rules (verify-version-tags.sh) read .github/ only, and
+# this script runs on every ./yarn call, so they are not a numbered step.
+# CI and the pre-commit hook run verify-version-tags-if-changed.sh, which
+# checks when a file under .github/ or the check itself changed.
+#
+# A tag or release run is the exception: the rules are always checked there,
+# so a release workflow that calls only this script still gets them. This
+# repository has no workflow that runs on tags or releases; the branch is for
+# one that is added later and for repositories that copy this script.
+if [ "${GITHUB_REF_TYPE:-}" = "tag" ] || [ "${GITHUB_EVENT_NAME:-}" = "release" ]; then
+  ./scripts/security/verify-version-tags-if-changed.sh
+  echo
+fi
 
 exit 0
