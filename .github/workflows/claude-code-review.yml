@@ -362,10 +362,18 @@ jobs:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           INLINE_BEFORE: ${{ steps.input.outputs.inline_before }}
           STRUCTURED: ${{ steps.claude.outputs.structured_output }}
+          CONCLUSION: ${{ steps.claude.outputs.conclusion }}
         shell: sh
         run: |
           set -eu
+          # The action returns success with no conclusion when this file differs
+          # from the default branch. That skip is expected; a real run sets conclusion.
           if [ -z "${STRUCTURED:-}" ]; then
+            if [ -z "${CONCLUSION:-}" ]; then
+              echo "Claude skipped this run and posted no summary."
+              echo "The action does that when this workflow differs from the default branch."
+              exit 0
+            fi
             echo "Claude did not return structured review output, so no summary comment was posted." >&2
             exit 1
           fi
