@@ -32,6 +32,8 @@ Match the pages already in `docs/`.
 
 `./yarn lint` is `biome check`. `./yarn lint:fix` writes fixes. `biome.jsonc` is the config: recommended rules, two-space indent, line width 100, double quotes, semicolons, trailing commas, and LF. Biome covers JS, TS, and JSON, not Markdown. Shell and YAML are `./yarn lint:shell` and `./yarn lint:yaml`. Leave `noUnresolvedImports` off because Yarn PnP is not resolvable. Do not disable a rule to land a change.
 
+Do not write comments in JS or TS. `./yarn lint:comments` fails on any comment that is not in `scripts/comments-baseline.txt`, and that list can only shrink. Tool directives and comments that start with "Backwards compatibility" are allowed.
+
 ## Pins
 
 Keep the pins intact. Versions in `package.json` are exact. `engines.node`, `engines.yarn`, and `packageManager` (including its sha256) stay aligned with `.node-version`, `.nvmrc`, and the Yarn binary in `.yarn/releases`. Do not hand-edit `yarn.lock`, `.yarn/cache`, `.pnp.cjs`, `.pnp.loader.mjs`, `.yarn/yarn-binary-hash.txt`, or `package-attestations.json`.
