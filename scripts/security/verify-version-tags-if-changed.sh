@@ -5,8 +5,9 @@
 #   - a file under .github/ or the check itself changed, or
 #   - the run is for a tag or a GitHub release (always checked), or
 #   - the change cannot be worked out, so the check runs to be safe.
-# The check reads workflow files only, so any other change skips it. It is
-# not part of security-checks.sh, which runs on every ./yarn call.
+# The check reads workflow files only, so any other change skips it.
+# security-checks.sh runs on every ./yarn call, so it calls this script only
+# on a tag or release run.
 #
 #   verify-version-tags-if-changed.sh            compare HEAD with its parent
 #   verify-version-tags-if-changed.sh --staged   compare the index (pre-commit)
@@ -24,9 +25,17 @@ NC='\033[0m'
 ROOT=$(CDPATH='' cd -- "$(dirname "$0")/../.." && pwd)
 cd "$ROOT"
 
-# verify-version-tags.sh, its fixtures script and directory, and this script
-# with its own fixtures.
-PATHS_RE='^\.github/|^scripts/security/(verify-version-tags|fixtures/version-tags)'
+# Whether anything under .github/, verify-version-tags.sh, its fixtures
+# script and directory, or this script and its own fixtures differs. git is
+# asked with pathspecs, because a listed path is quoted when it has a
+# non-ASCII byte, a quote or a backslash, and a quoted line matches no
+# pattern. Exit 0: no difference. 1: a difference. Other: git failed.
+watched_paths_differ() {
+  git diff --quiet "$@" -- \
+    .github \
+    'scripts/security/verify-version-tags*' \
+    'scripts/security/fixtures/version-tags*'
+}
 
 MODE='head'
 case "${1:-}" in
@@ -42,17 +51,23 @@ reason=''
 if [ "${GITHUB_REF_TYPE:-}" = "tag" ] || [ "${GITHUB_EVENT_NAME:-}" = "release" ]; then
   reason='release'
 elif [ "$MODE" = staged ]; then
-  if ! changed=$(git diff --cached --name-only); then
-    reason='staged files could not be listed'
-  elif printf '%s\n' "$changed" | grep -Eq "$PATHS_RE"; then
+  status=0
+  watched_paths_differ --cached || status=$?
+  if [ "$status" -eq 1 ]; then
     reason='workflow or check files are staged'
+  elif [ "$status" -ne 0 ]; then
+    reason='staged files could not be compared'
   fi
 elif ! git rev-parse --verify -q 'HEAD^1' >/dev/null 2>&1; then
   reason='no parent commit to compare with'
-elif ! changed=$(git diff --name-only 'HEAD^1' HEAD); then
-  reason='changed files could not be listed'
-elif printf '%s\n' "$changed" | grep -Eq "$PATHS_RE"; then
-  reason='workflow or check files changed'
+else
+  status=0
+  watched_paths_differ 'HEAD^1' HEAD || status=$?
+  if [ "$status" -eq 1 ]; then
+    reason='workflow or check files changed'
+  elif [ "$status" -ne 0 ]; then
+    reason='changed files could not be compared'
+  fi
 fi
 
 if [ -z "$reason" ]; then

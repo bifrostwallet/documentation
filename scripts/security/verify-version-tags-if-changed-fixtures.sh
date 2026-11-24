@@ -27,6 +27,13 @@ FAILED=0
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT INT HUP TERM
 
+# TMPDIR can be inside a checkout. Without a ceiling, git in a temporary
+# directory that has no repository of its own would find that checkout, and
+# the "no git repository" cases would test it instead.
+WORK=$(CDPATH='' cd -- "$WORK" && pwd -P)
+GIT_CEILING_DIRECTORIES=$WORK
+export GIT_CEILING_DIRECTORIES
+
 git_q() {
   git -c user.name=fixture -c user.email=fixture@example.invalid \
     -c commit.gpgsign=false -c core.hooksPath=/dev/null "$@" >/dev/null 2>&1
@@ -101,6 +108,25 @@ mkdir -p "$repo/.github/actions/setup"
 echo 'name: setup' >"$repo/.github/actions/setup/action.yml"
 commit_change "$repo"
 expect 'composite action added' ran "$repo"
+
+# git quotes a path with a non-ASCII byte, a double quote or a backslash
+# when it lists changed files, so these must not depend on such a list.
+ODD_WORKFLOW=$(printf 'd\303\251ploy "v2".yml')
+
+new_repo workflow-odd-name
+echo 'name: deploy' >"$repo/.github/workflows/$ODD_WORKFLOW"
+commit_change "$repo"
+expect 'workflow with a name git quotes' ran "$repo"
+
+new_repo workflow-odd-name-staged
+echo 'name: deploy' >"$repo/.github/workflows/$ODD_WORKFLOW"
+(cd "$repo" && git_q add -A)
+expect 'staged workflow with a name git quotes' ran "$repo" --staged
+
+new_repo source-odd-name
+echo 'two' >"$repo/src/$ODD_WORKFLOW"
+commit_change "$repo"
+expect 'source file with a name git quotes' skipped "$repo"
 
 new_repo check-change
 echo '# changed' >>"$repo/scripts/security/verify-version-tags.sh"
