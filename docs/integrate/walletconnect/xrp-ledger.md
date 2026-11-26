@@ -54,22 +54,27 @@ Set `submit: false` if you want a signed payload to broadcast yourself (you must
 
 ### Supported TransactionType values
 
-* `Payment`
-* `TrustSet`
-* `OfferCreate`
-* `OfferCancel`
-* `NFTokenCreateOffer`
-* `NFTokenAcceptOffer`
-* `NFTokenCancelOffer`
-* `AMMDeposit`
-* `AMMWithdraw`
-* `AccountSet`
-* `AccountDelete`
-* `CheckCreate`
-* `CheckCash`
-* `CheckCancel`
+| Area | `TransactionType` |
+| --- | --- |
+| Payments | `Payment`, `CheckCreate`, `CheckCash`, `CheckCancel`, `EscrowCreate`, `EscrowFinish`, `EscrowCancel`, `PaymentChannelCreate`, `PaymentChannelFund`, `PaymentChannelClaim`, `DepositPreauth` |
+| Tokens and trust lines | `TrustSet`, `Clawback`, `MPTokenAuthorize`, `MPTokenIssuanceCreate`, `MPTokenIssuanceSet`, `MPTokenIssuanceDestroy` |
+| DEX and AMM | `OfferCreate`, `OfferCancel`, `AMMCreate`, `AMMDeposit`, `AMMWithdraw`, `AMMVote`, `AMMBid`, `AMMDelete`, `AMMClawback` |
+| NFTs | `NFTokenMint`, `NFTokenBurn`, `NFTokenModify`, `NFTokenCreateOffer`, `NFTokenAcceptOffer`, `NFTokenCancelOffer` |
+| Account | `AccountSet`, `AccountDelete`, `SetRegularKey`, `SignerListSet`, `TicketCreate`, `DelegateSet`, `LedgerStateFix` |
+| Credentials, DIDs, oracles and permissioned domains | `CredentialCreate`, `CredentialAccept`, `CredentialDelete`, `DIDSet`, `DIDDelete`, `OracleSet`, `OracleDelete`, `PermissionedDomainSet`, `PermissionedDomainDelete` |
 
-Other transaction types are rejected.
+Other transaction types are rejected, including `Batch` and the `XChain…` bridge transactions.
+
+### Transaction rules
+
+Bifrost checks `tx_json` before it shows the request to the user. A request that breaks one of these rules is rejected with error code `-32602` and is not shown:
+
+* **Known fields only.** `tx_json` may contain only the fields the XRP Ledger defines for its `TransactionType`, each in its standard JSON form. An unknown field, a missing required field or a value of the wrong type is rejected.
+* **Fee limit.** A `Fee` above 10 XRP (`"10000000"` drops) is rejected. Leave `Fee` out with `autofill: true` to let Bifrost set it.
+* **No signatures.** Do not send `TxnSignature` or `Signers`. Bifrost adds the signature itself.
+* **No `Delegate`.** Transactions sent on behalf of another account are not supported.
+
+An unsupported `TransactionType` gets the same error code with the message `Unsupported transaction`.
 
 ## Connect + Payment example
 

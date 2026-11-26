@@ -25,6 +25,16 @@ That is the WalletConnect mobile-linking shape (`{wallet}/wc?uri={WC_URI}`). Pre
 
 Naked WalletConnect URIs (`wc:<topic>@2?relay-protocol=irn&symKey=…`) are for QR / copy-paste. Relay protocol must be `irn`.
 
+### Dapp metadata
+
+Set `metadata.url` to your dapp’s `https://` address. Bifrost shows it to the user in the connection request.
+
+* The address must use `https://` and a public hostname such as `app.example.com`
+* A bare hostname (`app.example.com`) is read as `https://app.example.com`
+* `http://` addresses, `localhost`, IP addresses and a missing `url` are refused
+
+Bifrost rejects a session proposal or a One-Click Auth request whose `metadata.url` is refused, and tells the user that the dapp did not provide a valid website address. To test against Bifrost, deploy your dapp to an `https://` address.
+
 ### After approval
 
 * **Android:** Bifrost may redirect back to the dapp using the session redirect metadata
@@ -68,6 +78,8 @@ See the [EVM](evm-blockchains.md), [UTXO](utxo-blockchains.md), and [XRPL](xrp-l
 ## One-Click Auth (SIWE)
 
 Bifrost supports WalletConnect `session_authenticate` (One-Click Auth). Authenticate requests are handled with EIP-191 / `personal_sign` style signing for the `eip155` namespace.
+
+The same network rule applies as for a session: Bifrost signs in only on the `eip155` chains of its active network, which is mainnet unless the user has turned on Developer Mode. Chains of the other network and chains of other namespaces are left out. If no requested chain remains, the request is rejected as unsupported chains.
 
 ## Session namespaces
 

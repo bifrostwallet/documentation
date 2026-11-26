@@ -12,7 +12,8 @@ Bifrost Wallet is a [WalletConnect](https://walletconnect.com/) **certified wall
 
 ## Important constraints
 
-* Sessions are gated by the wallet’s **mainnet vs testnet** mode. A mainnet-only proposal fails if the user is in testnet mode (and the reverse).
+* Sessions are gated by the wallet’s **mainnet vs testnet** mode. Bifrost is on mainnet unless the user has turned on Developer Mode, which switches it to testnets. A mainnet-only proposal fails in Developer Mode (and the reverse). One-Click Auth follows the same rule.
+* The dapp’s `metadata.url` must be an `https://` address with a public hostname. See [Connect](connect.md#dapp-metadata).
 * Bifrost keeps a limited number of concurrent sessions (currently five). Older sessions may be pruned.
 * UTXO and XRPL methods are available over WalletConnect (`bip122` / `xrpl` namespaces).
 * After connect, read approved accounts from `session.namespaces.<ns>.accounts` ([CAIP-10](https://github.com/ChainAgnostic/CAIPs/blob/main/CAIPs/caip-10.md)). See [Connect](connect.md#reading-accounts-after-connect).
