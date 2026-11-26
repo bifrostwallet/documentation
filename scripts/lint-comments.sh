@@ -35,8 +35,7 @@
 #
 # Runs before install: POSIX sh entrypoint, embedded Node stdlib program, no
 # packages. The scanner is not a parser: `//` in JSX text is read as a comment
-# unless a colon comes right before it (URLs). Its rules are tested by
-# scripts/lint-comments-fixtures.sh.
+# unless a colon comes right before it (URLs).
 
 set -eu
 
