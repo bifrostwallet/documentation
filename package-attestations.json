@@ -391,6 +391,14 @@
     "repository": "https://github.com/biomejs/biome",
     "since": "2.5.15"
   },
+  "@biomejs/cli-android-arm64": {
+    "repository": "https://github.com/biomejs/biome",
+    "since": "2.6.3"
+  },
+  "@biomejs/cli-android-x64": {
+    "repository": "https://github.com/biomejs/biome",
+    "since": "2.6.3"
+  },
   "@biomejs/cli-darwin-arm64": {
     "repository": "https://github.com/biomejs/biome",
     "since": "2.5.15"
@@ -647,6 +655,10 @@
     "repository": "https://github.com/expressjs/express",
     "since": "4.22.3"
   },
+  "fast-uri": {
+    "repository": "https://github.com/fastify/fast-uri",
+    "since": "3.1.9"
+  },
   "fastq": {
     "repository": "https://github.com/mcollina/fastq",
     "since": "1.20.3"
@@ -690,6 +702,10 @@
   "nopt": {
     "repository": "https://github.com/npm/nopt",
     "since": "10.0.1"
+  },
+  "on-finished": {
+    "repository": "https://github.com/jshttp/on-finished",
+    "since": "2.4.2"
   },
   "pkijs": {
     "repository": "https://github.com/peculiarventures/pki.js",
