@@ -35,7 +35,9 @@
 #
 # Runs before install: POSIX sh entrypoint, embedded Node stdlib program, no
 # packages. The scanner is not a parser: `//` in JSX text is read as a comment
-# unless a colon comes right before it (URLs).
+# unless a colon comes right before it (URLs). A quote with no partner on its
+# line, or a quoted span that holds `{/*`, is read as text (an apostrophe in
+# JSX text), so a comment after it is still found.
 
 set -eu
 
@@ -191,9 +193,14 @@ function scan(text) {
       countLines(start, i);
       comments.push({ line: startLine, endLine: line, start, end: i });
     } else if (c === '"' || c === "'") {
+      const start = i;
       i++;
       while (i < n && text[i] !== c && text[i] !== "\n") i += text[i] === "\\" ? 2 : 1;
-      if (text[i] === c) i++;
+      if (text[i] === c && !text.slice(start, i).includes("{/*")) {
+        i++;
+      } else {
+        i = start + 1;
+      }
       prev = "value";
     } else if (c === "`") {
       i++;
