@@ -22,6 +22,7 @@
     "lint:fix": "biome check --write",
     "lint:shell": "./scripts/lint-shell.sh",
     "lint:yaml": "./scripts/lint-yaml.sh",
+    "lint:comments": "./scripts/lint-comments.sh",
     "security:check": "./scripts/security/security-checks.sh",
     "security:verify-node": "./scripts/security/verify-node-version.sh",
     "security:verify-yarn-binary": "./scripts/security/verify-yarn-hash.sh",

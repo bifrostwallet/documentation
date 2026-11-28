@@ -12,6 +12,7 @@ echo
 
 printf '%b\n' "${YELLOW}1 of 6: Blocking IDE/agent autostart persistence files...${NC}"
 ./scripts/security/block-ide-autostart-hooks.sh
+./scripts/security/verify-agent-skills.sh
 echo
 
 printf '%b\n' "${YELLOW}2 of 6: Verifying Node.js version...${NC}"
@@ -32,7 +33,6 @@ echo
 
 printf '%b\n' "${YELLOW}6 of 6: Verifying tsconfig module lanes (NodeNext or Bundler)...${NC}"
 ./scripts/security/verify-tsconfig-lanes.sh
-./scripts/security/verify-tsconfig-lanes-fixtures.sh
 echo
 
 # The workflow tag rules (verify-version-tags.sh) read .github/ only, and

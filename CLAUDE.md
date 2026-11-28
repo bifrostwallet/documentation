@@ -1,6 +1,6 @@
 # Bifrost Wallet documentation
 
-Public developer docs for [docs.bifrostwallet.com](https://docs.bifrostwallet.com). Pages are Markdown in `docs/`. The sidebar is `sidebars.js`. Theme CSS is `src/css/custom.css`.
+Public developer docs for [docs.bifrostwallet.com](https://docs.bifrostwallet.com). Each rule here is stated once, in the section named for its topic. Pages are Markdown in `docs/`. The sidebar is `sidebars.js`. Theme CSS is `src/css/custom.css`.
 
 ## Build
 
@@ -28,15 +28,23 @@ Match the pages already in `docs/`.
 - Link other pages with a relative path. External links are `https` URLs. Close a guide with a References list when it cites specs.
 - The product name is Bifrost Wallet. Prefer WalletConnect. Web3 injection is the in-app browser and is EVM only. Integrators use their own Reown project ID.
 
-## Biome
+## Lint
 
 `./yarn lint` is `biome check`. `./yarn lint:fix` writes fixes. `biome.jsonc` is the config: recommended rules, two-space indent, line width 100, double quotes, semicolons, trailing commas, and LF. Biome covers JS, TS, and JSON, not Markdown. Shell and YAML are `./yarn lint:shell` and `./yarn lint:yaml`. Leave `noUnresolvedImports` off because Yarn PnP is not resolvable. Do not disable a rule to land a change.
+
+Do not write comments in JS or TS. `./yarn lint:comments` fails on any comment that is not in `scripts/comments-baseline.txt`, and that list can only shrink. A rule the code must keep becomes code that fails when it is broken: a name, a type, a check, a test, or a lint rule. Do not write it in a document instead, and do not create `docs/adr/`. Tool directives and comments that start with "Backwards compatibility" are allowed.
+
+Do not add fixture runners (`*-fixtures.sh`) or sample files (`scripts/security/fixtures/`) for the gate scripts. A gate runs against this repository's own files.
 
 ## Pins
 
 Keep the pins intact. Versions in `package.json` are exact. `engines.node`, `engines.yarn`, and `packageManager` (including its sha256) stay aligned with `.node-version`, `.nvmrc`, and the Yarn binary in `.yarn/releases`. Do not hand-edit `yarn.lock`, `.yarn/cache`, `.pnp.cjs`, `.pnp.loader.mjs`, `.yarn/yarn-binary-hash.txt`, or `package-attestations.json`.
 
-Workflows run on `ubuntu-24.04`. Actions and images are pinned to a full SHA or digest. Pass untrusted `${{ }}` values through step `env:` and read them as quoted shell variables, never inside `run:`. Do not add dependencies. `enableScripts` stays false.
+Do not add dependencies. `enableScripts` stays false.
+
+## GitHub Actions
+
+Workflows run on `ubuntu-24.04`. Actions and images are pinned to a full SHA or digest. Pass untrusted `${{ }}` values through step `env:` and read them as quoted shell variables, never inside `run:`.
 
 ## Approval
 
